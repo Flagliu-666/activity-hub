@@ -1,0 +1,33 @@
+import { connect } from 'worktop-sqlite';
+
+const db = connect('activity-hub.db');
+
+// 数据库初始化
+export async function initDB() {
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL DEFAULT 'available',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      used_at DATETIME
+    );
+    CREATE INDEX IF NOT EXISTS idx_codes_status ON codes(status);
+    
+    CREATE TABLE IF NOT EXISTS csrf_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token TEXT NOT NULL UNIQUE,
+      expires_at DATETIME NOT NULL
+    );
+  `);
+
+  // 种子数据
+  const codes = [
+    '873512409', '216984735', '590327148', '448209651', '735126890',
+    '129850376', '654389012', '982103467', '301974528', '567230194'
+  ];
+  
+  for (const code of codes) {
+    await db.run('INSERT OR IGNORE INTO codes (code) VALUES (?)', [code]);
+  }
+}

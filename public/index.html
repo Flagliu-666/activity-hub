@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <title>活动互助站</title>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="活动互助站">
+    <meta property="og:description" content="互助共赢，省心省力">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤝</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1a1a2e;
+            --text-secondary: #6b7280;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 36px 20px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: headerPulse 8s ease-in-out infinite;
+        }
+        @keyframes headerPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .header .logo {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            margin: 0 auto 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .header .title {
+            font-size: 24px; font-weight: 700;
+            margin-bottom: 6px; position: relative;
+        }
+        .header .slogan {
+            font-size: 14px; opacity: 0.9; position: relative;
+        }
+
+        /* ===== 统计卡片 ===== */
+        .stats {
+            display: flex; gap: 10px;
+            padding: 16px 16px 0;
+            margin-top: -20px;
+            position: relative; z-index: 2;
+        }
+        .stat-card {
+            flex: 1; background: var(--card);
+            border-radius: 14px; padding: 14px 10px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .stat-card .stat-num {
+            font-size: 22px; font-weight: 700; color: var(--primary);
+        }
+        .stat-card .stat-label {
+            font-size: 12px; color: var(--text-secondary); margin-top: 4px;
+        }
+
+        /* ===== 微信横幅 ===== */
+        .wechat-banner, .group-banner {
+            margin: 12px 16px; border-radius: 14px;
+            padding: 14px 18px;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            cursor: pointer; position: relative; overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .wechat-banner:active, .group-banner:active { transform: scale(0.98); }
+        .wechat-banner {
+            background: linear-gradient(135deg, #07c160 0%, #05a34e 100%);
+            box-shadow: 0 4px 15px rgba(7, 193, 96, 0.3);
+        }
+        .group-banner {
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
+        }
+        .wechat-banner::before, .group-banner::before {
+            content: '';
+            position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: bannerGlow 4s ease-in-out infinite;
+        }
+        @keyframes bannerGlow {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.15); opacity: 0.8; }
+        }
+        .banner-left {
+            display: flex; align-items: center; gap: 12px;
+            position: relative; flex: 1; min-width: 0;
+        }
+        .banner-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 18px;
+        }
+        .banner-text .banner-title {
+            font-size: 15px; font-weight: 600; color: white;
+        }
+        .banner-text .banner-desc {
+            font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;
+        }
+        .banner-arrow {
+            color: white; font-size: 14px; position: relative; flex-shrink: 0; opacity: 0.9;
+        }
+
+        /* ===== 活动区域 ===== */
+        .section { padding: 20px 16px 10px; }
+        .section-title {
+            font-size: 17px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .activity-card {
+            background: var(--card);
+            border-radius: 16px; padding: 16px;
+            margin-bottom: 10px;
+            display: flex; align-items: center;
+            text-decoration: none; color: inherit;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+            gap: 14px;
+        }
+        .activity-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .ac-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; flex-shrink: 0;
+        }
+        .ac-icon.orange { background: linear-gradient(135deg, #ff6b00, #ff8f00); }
+        .ac-icon.red    { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .ac-info { flex: 1; min-width: 0; }
+        .ac-name { font-size: 15px; font-weight: 600; }
+        .ac-desc { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+        .ac-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+        .ac-arrow { color: #c0c0c0; font-size: 18px; flex-shrink: 0; }
+        .hot-tag {
+            display: inline-block; font-size: 10px;
+            background: #fef3c7; color: #d97706;
+            padding: 2px 6px; border-radius: 4px;
+            margin-left: 6px; vertical-align: middle;
+        }
+
+        /* ===== 底部 ===== */
+        .footer {
+            text-align: center; padding: 30px 20px 40px; margin-top: 10px;
+        }
+        .footer-text {
+            font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;
+        }
+        .footer-contact {
+            font-size: 13px; color: var(--primary); font-weight: 500;
+        }
+        .footer-copy {
+            font-size: 11px; color: #c0c0c0; margin-top: 12px;
+        }
+
+        /* ===== 二维码弹窗 ===== */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-box {
+            background: white; border-radius: 20px;
+            padding: 28px 24px 20px; text-align: center;
+            max-width: 300px; width: 90%;
+            animation: modalPop 0.3s ease;
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-box .modal-title {
+            font-size: 17px; font-weight: 700; margin-bottom: 16px;
+        }
+        .modal-box .modal-qr-placeholder {
+            width: 180px; height: 180px; border-radius: 12px;
+            margin: 0 auto 14px;
+            background: #f3f4f6;
+            display: flex; align-items: center; justify-content: center;
+            color: #9ca3af; font-size: 13px;
+        }
+        .modal-box .modal-close {
+            background: #f0f2f5; color: #6b7280;
+            padding: 10px 36px; border-radius: 20px;
+            font-size: 14px; font-weight: 500;
+            cursor: pointer; display: inline-block;
+        }
+        .modal-box .modal-close:active { background: #e5e7eb; }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white;
+            padding: 10px 20px; border-radius: 20px;
+            font-size: 14px; z-index: 2000;
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 头部 ===== -->
+    <header class="header">
+        <div class="logo">🤝</div>
+        <div class="title">活动互助站</div>
+        <div class="slogan">互助共赢 · 省心省力 · 一起撸毛</div>
+    </header>
+
+    <!-- ===== 统计卡片 ===== -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-num" id="statActivity">3</div>
+            <div class="stat-label">进行中活动</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="statCodes">--</div>
+            <div class="stat-label">可用邀请码</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="statUsed">--</div>
+            <div class="stat-label">已助力人次</div>
+        </div>
+    </div>
+
+    <!-- ===== 微信关注横幅 ===== -->
+    <div class="wechat-banner" onclick="showModal('wechat')">
+        <div class="banner-left">
+            <div class="banner-icon">💬</div>
+            <div class="banner-text">
+                <div class="banner-title">关注公众号</div>
+                <div class="banner-desc">获取最新活动通知</div>
+            </div>
+        </div>
+        <div class="banner-arrow">去关注 ›</div>
+    </div>
+
+    <!-- ===== 入群横幅 ===== -->
+    <div class="group-banner" onclick="showModal('group')">
+        <div class="banner-left">
+            <div class="banner-icon">👥</div>
+            <div class="banner-text">
+                <div class="banner-title">加入交流群</div>
+                <div class="banner-desc">群内互助，更多福利</div>
+            </div>
+        </div>
+        <div class="banner-arrow">加入群聊 ›</div>
+    </div>
+
+    <!-- ===== 活动列表 ===== -->
+    <section class="section">
+        <div class="section-title">🎯 选择活动</div>
+
+        <a href="/pdd.html" class="activity-card">
+            <div class="ac-icon orange">🎁</div>
+            <div class="ac-info">
+                <div class="ac-name">PDD福袋互助 <span class="hot-tag">热门</span></div>
+                <div class="ac-desc">拼多多福袋邀请码互助，一键复制跳转</div>
+                <div class="ac-meta">🔁 实时可用 · 点击进入</div>
+            </div>
+            <span class="ac-arrow">›</span>
+        </a>
+
+        <a href="javascript:void(0)" class="activity-card" onclick="showToast('即将上线，敬请期待')">
+            <div class="ac-icon red">🛒</div>
+            <div class="ac-info">
+                <div class="ac-name">京东助力互助</div>
+                <div class="ac-desc">京东红包/京豆助力换码</div>
+                <div class="ac-meta">🔜 即将上线</div>
+            </div>
+            <span class="ac-arrow">›</span>
+        </a>
+
+        <a href="javascript:void(0)" class="activity-card" onclick="showToast('即将上线，敬请期待')">
+            <div class="ac-icon red" style="background:linear-gradient(135deg, #14b8a6, #2dd4bf)">🍔</div>
+            <div class="ac-info">
+                <div class="ac-name">美团外卖互助</div>
+                <div class="ac-desc">美团红包/优惠券互助</div>
+                <div class="ac-meta">🔜 即将上线</div>
+            </div>
+            <span class="ac-arrow">›</span>
+        </a>
+    </section>
+
+    <!-- ===== 底部 ===== -->
+    <footer class="footer">
+        <div class="footer-text">扫码关注公众号</div>
+        <div class="footer-contact">微信：your_wechat_id</div>
+        <div class="footer-copy">© 2026 活动互助站 · 互助让生活更美好</div>
+    </footer>
+
+    <!-- ===== 弹窗 ===== -->
+    <div class="modal-overlay" id="modalWechat" onclick="hideModal('wechat')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-title">💬 微信扫码关注</div>
+            <div class="modal-qr-placeholder">公众号二维码<br>（请替换为真实图片）</div>
+            <div class="modal-close" onclick="hideModal('wechat')">关闭</div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalGroup" onclick="hideModal('group')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-title">👥 扫码加入交流群</div>
+            <div class="modal-qr-placeholder">群二维码<br>（请替换为真实图片）</div>
+            <div class="modal-close" onclick="hideModal('group')">关闭</div>
+        </div>
+    </div>
+
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function showModal(type) {
+            document.getElementById('modal' + (type === 'wechat' ? 'Wechat' : 'Group')).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function hideModal(type) {
+            document.getElementById('modal' + (type === 'wechat' ? 'Wechat' : 'Group')).classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // 加载统计数据
+        fetch('/api/stats')
+            .then(r => r.json())
+            .then(res => {
+                document.getElementById('statCodes').textContent = res.available;
+                document.getElementById('statUsed').textContent = res.used;
+            })
+            .catch(() => {
+                document.getElementById('statCodes').textContent = '--';
+                document.getElementById('statUsed').textContent = '--';
+            });
+    </script>
+</body>
+</html>
