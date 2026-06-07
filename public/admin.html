@@ -309,6 +309,25 @@
 
         <!-- 管理员 -->
         <div id="tab-admins" class="section">
+            <!-- 修改密码 -->
+            <div class="card" id="changePasswordCard">
+                <div class="card-title">🔑 修改密码</div>
+                <div class="form-group">
+                    <label class="form-label">当前密码</label>
+                    <input type="password" class="form-input" id="currentPassword" placeholder="输入当前密码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">新密码</label>
+                    <input type="password" class="form-input" id="newPassword" placeholder="输入新密码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认新密码</label>
+                    <input type="password" class="form-input" id="confirmPassword" placeholder="再次输入新密码">
+                </div>
+                <button class="btn btn-primary" onclick="changePassword()" style="width: 100%;">修改密码</button>
+            </div>
+            
+            <!-- 添加管理员（仅主管理员） -->
             <div class="card" id="addAdminCard">
                 <div class="card-title">添加管理员</div>
                 <div class="form-group">
@@ -768,6 +787,54 @@
                     loadAdmins();
                 } else {
                     showToast('⚠️ ' + (data.error || '删除失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        // 修改密码
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('⚠️ 请填写所有密码字段');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('⚠️ 新密码至少需要 6 位');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('⚠️ 两次输入的新密码不一致');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/admin/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Session': adminSession
+                    },
+                    body: JSON.stringify({ 
+                        current_password: currentPassword,
+                        new_password: newPassword 
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 密码修改成功');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    showToast('⚠️ ' + (data.error || '修改失败'));
                 }
             } catch(e) {
                 showToast('⚠️ 网络错误');

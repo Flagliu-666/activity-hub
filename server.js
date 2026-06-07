@@ -641,6 +641,45 @@ app.post('/api/admin/logout', verifyAdmin, (req, res) => {
   res.json({ success: true });
 });
 
+// 管理员：修改密码
+app.post('/api/admin/change-password', verifyAdmin, (req, res) => {
+  const { current_password, new_password } = req.body;
+  
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: '请填写当前密码和新密码' });
+  }
+  
+  if (new_password.length < 6) {
+    return res.status(400).json({ error: '新密码至少需要 6 位' });
+  }
+  
+  // 验证当前密码是否正确
+  const passwordHash = hashPassword(current_password);
+  try {
+    const stmt = db.prepare('SELECT id FROM admins WHERE id = ? AND password = ?');
+    stmt.bind([req.admin.id, passwordHash]);
+    let exists = false;
+    if (stmt.step()) {
+      exists = true;
+    }
+    stmt.free();
+    
+    if (!exists) {
+      return res.status(401).json({ error: '当前密码错误' });
+    }
+    
+    // 更新密码
+    const newHash = hashPassword(new_password);
+    db.run('UPDATE admins SET password = ? WHERE id = ?', [newHash, req.admin.id]);
+    saveDB();
+    
+    res.json({ success: true });
+  } catch(e) {
+    console.error('修改密码失败:', e);
+    res.status(500).json({ error: '修改失败' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 initDB().then(() => {
