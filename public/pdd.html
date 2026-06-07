@@ -10,14 +10,16 @@
             background: linear-gradient(135deg, #FFF7ED, #FED7AA);
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            padding-bottom: 70px;
         }
         .header {
             background: linear-gradient(135deg, #F97316, #F59E0B);
             color: white;
-            padding: 20px 16px;
+            padding: 24px 16px 20px;
             position: sticky;
             top: 0;
             z-index: 10;
+            box-shadow: 0 2px 12px rgba(249, 115, 22, 0.2);
         }
         .header-top {
             display: flex;
@@ -29,58 +31,52 @@
             text-decoration: none;
             color: white;
         }
-        .header-title h1 { font-size: 18px; font-weight: 600; }
-        .header-title p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
-        .badge { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-size: 12px; }
-        .group-banner {
-            margin: 12px 16px; border-radius: 14px;
-            padding: 14px 18px;
-            display: flex; align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            background: linear-gradient(135deg, #1890ff, #096dd9);
-            box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
-        }
-        .banner-left { display: flex; align-items: center; gap: 12px; flex: 1; }
-        .banner-icon {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-        }
-        .banner-text .banner-title { font-size: 15px; font-weight: 600; color: white; }
-        .banner-text .banner-desc { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; }
-        .banner-arrow { color: white; font-size: 14px; }
+        .header-title h1 { font-size: 20px; font-weight: 700; }
+        .header-title p { font-size: 13px; opacity: 0.95; margin-top: 4px; }
+        .badge { background: rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 16px; font-size: 13px; font-weight: 600; }
         .submit-section {
-            margin: 0 16px; padding: 16px;
+            margin: 16px; padding: 18px;
             background: white; border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(249,115,22,0.08);
+            box-shadow: 0 2px 12px rgba(249,115,22,0.1);
+        }
+        .submit-label {
+            margin-bottom: 10px;
+            display: block;
+        }
+        .submit-label span:first-child {
+            color: #F97316; font-weight: 600; font-size: 15px;
+        }
+        .submit-label span:last-child {
+            color: #9ca3af; font-size: 12px; margin-left: 8px;
         }
         .submit-input {
-            width: 100%; padding: 12px 16px;
+            width: 100%; padding: 14px 16px;
             border: 2px solid #e5e7eb; border-radius: 12px;
             font-size: 18px; text-align: center;
             letter-spacing: 0.1em;
             font-family: 'Courier New', monospace;
             font-weight: 600;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
-        .submit-input:focus { border-color: #F97316; }
+        .submit-input:focus { border-color: #F97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
         .submit-btn {
-            width: 100%; margin-top: 10px; padding: 12px;
+            width: 100%; margin-top: 12px; padding: 14px;
             border: none; border-radius: 12px;
             font-size: 16px; font-weight: 600;
             color: white; cursor: pointer;
             background: linear-gradient(135deg, #F97316, #F59E0B);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+            transition: transform 0.1s;
         }
+        .submit-btn:active { transform: scale(0.98); }
         .tab-bar {
             display: flex; gap: 8px;
-            padding: 12px 16px;
+            padding: 16px 16px 12px;
             overflow-x: auto;
         }
         .tab-btn {
-            padding: 8px 20px; border-radius: 20px;
+            padding: 10px 24px; border-radius: 20px;
             font-size: 14px; font-weight: 500;
             border: none; cursor: pointer;
             transition: all 0.2s;
@@ -94,13 +90,15 @@
         }
         .code-card {
             display: flex; align-items: center; gap: 12px;
-            padding: 14px 16px; margin: 0 16px 8px;
+            padding: 16px; margin: 0 16px 10px;
             background: white; border-radius: 14px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.15s;
         }
-        .code-card.used { opacity: 0.55; background: #f9fafb; }
+        .code-card:active { transform: scale(0.98); }
+        .code-card.used { opacity: 0.6; background: #f9fafb; }
         .code-card .code-num {
-            flex: 1; font-size: 18px;
+            flex: 1; font-size: 20px;
             font-family: 'Courier New', monospace;
             font-weight: 700; letter-spacing: 0.12em;
             color: #1f2937; cursor: pointer;
@@ -108,17 +106,24 @@
         .code-card.used .code-num { text-decoration: line-through; color: #9ca3af; }
         .code-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .btn-copy, .btn-go {
-            padding: 8px 14px; border: none;
-            border-radius: 8px; font-size: 13px;
+            padding: 10px 16px; border: none;
+            border-radius: 10px; font-size: 13px;
             font-weight: 600; cursor: pointer;
+            transition: all 0.15s;
         }
+        .btn-copy:active, .btn-go:active { transform: scale(0.95); }
         .btn-copy { background: #f3f4f6; color: #374151; }
         .btn-go {
             background: linear-gradient(135deg, #F97316, #F59E0B);
             color: white;
+            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.25);
         }
-        .code-card.used .btn-go { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
-        .time-label { font-size: 11px; color: #9ca3af; text-align: center; margin-top: -4px; margin-bottom: 8px; }
+        .code-card.used .btn-go { background: #d1d5db; color: #9ca3af; cursor: not-allowed; box-shadow: none; }
+        .time-label {
+            font-size: 11px; color: #9ca3af;
+            text-align: center; margin-top: -2px;
+            margin-bottom: 6px; padding: 0 16px;
+        }
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; display: flex;
@@ -128,44 +133,22 @@
         .bottom-nav a {
             flex: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 8px 0 12px; text-decoration: none;
+            padding: 10px 0 12px; text-decoration: none;
             color: #9ca3af; font-size: 11px;
         }
         .bottom-nav a.active { color: #F97316; }
-        .bottom-nav .nav-icon { font-size: 20px; margin-bottom: 2px; }
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            display: none; align-items: center; justify-content: center;
-            z-index: 1000;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-box {
-            background: white; border-radius: 20px;
-            padding: 28px 24px 20px; text-align: center;
-            max-width: 300px; width: 90%;
-        }
-        .modal-qr-placeholder {
-            width: 180px; height: 180px; border-radius: 12px;
-            margin: 0 auto 14px; overflow: hidden;
-        }
-        .modal-qr-placeholder img { width: 100%; height: 100%; object-fit: cover; }
-        .modal-close {
-            background: #f0f2f5; color: #6b7280;
-            padding: 10px 36px; border-radius: 20px;
-            font-size: 14px; cursor: pointer;
-        }
+        .bottom-nav .nav-icon { font-size: 22px; margin-bottom: 3px; }
         .toast {
             position: fixed; top: 20px; left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.82); color: white;
-            padding: 10px 20px; border-radius: 20px;
+            padding: 12px 24px; border-radius: 20px;
             font-size: 14px; z-index: 2000;
             opacity: 0; transition: opacity 0.3s;
             pointer-events: none; white-space: nowrap;
         }
         .toast.show { opacity: 1; }
-        .empty-state { text-align: center; padding: 40px 20px; color: #9ca3af; }
+        .empty-state { text-align: center; padding: 50px 20px; color: #9ca3af; }
     </style>
 </head>
 <body>
@@ -180,22 +163,11 @@
         </div>
     </div>
 
-    <div class="group-banner" onclick="showModal()">
-        <div class="banner-left">
-            <div class="banner-icon">👥</div>
-            <div class="banner-text">
-                <div class="banner-title">加入交流群</div>
-                <div class="banner-desc">群内互助，福利更多</div>
-            </div>
-        </div>
-        <div class="banner-arrow">进群 ›</div>
-    </div>
-
     <div class="submit-section">
-        <div style="margin-bottom: 10px;">
-            <span style="color: #F97316; font-weight: 600; font-size: 14px;">✏️ 提交你的9位助力码</span>
-            <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">以9开头，分享给其他人助力</span>
-        </div>
+        <label class="submit-label">
+            <span>✏️ 提交你的9位助力码</span>
+            <span>以9开头，分享给其他人助力</span>
+        </label>
         <input
             type="text"
             class="submit-input"
@@ -244,16 +216,6 @@
             <span class="nav-icon">✏️</span> 提交
         </a>
     </nav>
-
-    <div class="modal-overlay" id="modalGroup" onclick="hideModal()">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div style="font-size: 17px; font-weight: 700; margin-bottom: 16px;">👥 扫码加入交流群</div>
-            <div class="modal-qr-placeholder">
-                <img src="../images/group-qr.jpg" alt="交流群二维码">
-            </div>
-            <div class="modal-close" onclick="hideModal()">关闭</div>
-        </div>
-    </div>
 
     <div class="toast" id="toast"></div>
 
@@ -341,11 +303,14 @@
         }
 
         function copyCode(code, codeId) {
+            // 先标记为已使用，再复制
+            markAsUsed(codeId);
+            
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(code).then(() => {
-                    showToast('✅ 已复制，正在标记为已使用...');
-                    // 复制后立即标记为已使用
-                    markAsUsed(codeId);
+                    showToast('✅ 已复制并标记为已使用');
+                }).catch(() => {
+                    showToast('✅ 已标记为已使用');
                 });
             } else {
                 const el = document.createElement('textarea');
@@ -354,8 +319,7 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                showToast('✅ 已复制，正在标记为已使用...');
-                markAsUsed(codeId);
+                showToast('✅ 已复制并标记为已使用');
             }
         }
 
@@ -363,21 +327,19 @@
             fetch(`/api/pdd/codes/${codeId}/use`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
-            }).then(() => {
-                refreshStats();
-                loadCodes(currentFilter);
             }).catch(() => {});
         }
 
         function jumpToCode(code, codeId) {
-            // 先复制
+            // 先标记为已使用
+            markAsUsed(codeId);
+            
+            // 尝试复制
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(code).catch(() => {});
             }
-            // 标记为已使用
-            markAsUsed(codeId);
+            
             showToast('✅ 已复制，正在打开拼多多...');
-            // 延迟跳转，确保标记成功
             setTimeout(() => {
                 window.location.href = 'pinduoduo://com.xunmeng.pinduoduo/search_result.html?search_key=' + code;
             }, 500);
@@ -428,15 +390,6 @@
             toast.textContent = msg;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        function showModal() {
-            document.getElementById('modalGroup').classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-        function hideModal() {
-            document.getElementById('modalGroup').classList.remove('show');
-            document.body.style.overflow = '';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
