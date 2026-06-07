@@ -76,11 +76,13 @@
             background: white; border-radius: 14px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
+        .link-card.used { opacity: 0.55; background: #f9fafb; }
         .link-card .link-text {
             flex: 1; font-size: 14px;
             color: #1f2937; word-break: break-all;
             cursor: pointer;
         }
+        .link-card.used .link-text { text-decoration: line-through; color: #9ca3af; }
         .code-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .btn-copy, .btn-go {
             padding: 8px 14px; border: none;
@@ -91,6 +93,25 @@
         .btn-go {
             background: linear-gradient(135deg, #e1251b, #ff6b6b);
             color: white;
+        }
+        .link-card.used .btn-go { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+        .tab-bar {
+            display: flex; gap: 8px;
+            padding: 12px 16px;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            padding: 8px 20px; border-radius: 20px;
+            font-size: 14px; font-weight: 500;
+            border: none; cursor: pointer;
+            transition: all 0.2s;
+            background: #f3f4f6; color: #6b7280;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #e1251b, #ff6b6b);
+            color: white;
+            box-shadow: 0 2px 8px rgba(225, 37, 27, 0.3);
         }
         .time-label {
             font-size: 11px; color: #9ca3af;
@@ -186,6 +207,15 @@
         </button>
     </div>
 
+    <div class="tab-bar">
+        <button class="tab-btn active" id="tabAvailable" onclick="loadLinks('available')">
+            可用 <span id="countAvailable">0</span>
+        </button>
+        <button class="tab-btn" id="tabUsed" onclick="loadLinks('used')">
+            已使用 <span id="countUsed">0</span>
+        </button>
+    </div>
+
     <div id="linkList" class="pb-20">
         <div class="empty-state">
             <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
@@ -225,6 +255,7 @@
 
     <script>
         let csrfToken = '';
+        let currentFilter = 'available';
 
         async function init() {
             try {
@@ -233,7 +264,7 @@
                 csrfToken = d.token;
             } catch(e) {}
             await refreshStats();
-            loadLinks();
+            loadLinks('available');
         }
 
         async function refreshStats() {
@@ -241,12 +272,17 @@
                 const r = await fetch('/api/stats');
                 const d = await r.json();
                 document.getElementById('countBadge').textContent = d.jd_available + ' 可用';
+                document.getElementById('countAvailable').textContent = d.jd_available;
+                document.getElementById('countUsed').textContent = d.jd_used;
             } catch(e) {}
         }
 
-        async function loadLinks() {
+        async function loadLinks(filter) {
+            currentFilter = filter;
+            document.getElementById('tabAvailable').classList.toggle('active', filter === 'available');
+            document.getElementById('tabUsed').classList.toggle('active', filter === 'used');
             try {
-                const r = await fetch('/api/jd/links?status=available');
+                const r = await fetch(`/api/jd/links?status=${filter}`);
                 const links = await r.json();
                 renderLinks(links);
             } catch(e) {
@@ -258,7 +294,7 @@
         function renderLinks(links) {
             const container = document.getElementById('linkList');
             if (links.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📭</div><div>暂无链接</div></div>';
+                container.innerHTML = '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📭</div><div>暂无数据</div></div>';
                 return;
             }
             container.innerHTML = links.map((c, i) => {
@@ -303,7 +339,8 @@
         function copyLink(link, id) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(link).then(() => {
-                    showToast('✅ 已复制');
+                    showToast('✅ 已复制，正在标记为已使用...');
+                    markAsUsed(id);
                 });
             } else {
                 const el = document.createElement('textarea');
@@ -312,26 +349,31 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                showToast('✅ 已复制');
+                showToast('✅ 已复制，正在标记为已使用...');
+                markAsUsed(id);
             }
+        }
+
+        function markAsUsed(id) {
+            fetch(`/api/jd/links/${id}/use`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).then(() => {
+                refreshStats();
+                loadLinks(currentFilter);
+            }).catch(() => {});
         }
 
         function openLink(link, id) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(link).catch(() => {});
             }
-            fetch(`/api/jd/links/${id}/use`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            }).catch(() => {});
+            // 先标记为已使用
+            markAsUsed(id);
             showToast('✅ 已复制，正在打开京东...');
             setTimeout(() => {
                 window.location.href = link;
-            }, 300);
-            setTimeout(() => {
-                refreshStats();
-                loadLinks();
-            }, 1500);
+            }, 500);
         }
 
         async function submitLink() {
