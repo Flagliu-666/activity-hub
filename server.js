@@ -3,50 +3,14 @@ const initSqlJs = require('sql.js');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const axios = require('axios');
-const querystring = require('querystring');
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ===== 支付配置（请替换为你的真实配置）=====
-const WECHAT_PAY_CONFIG = {
-  appid: process.env.WECHAT_APPID || 'YOUR_WECHAT_APPID',
-  mch_id: process.env.WECHAT_MCH_ID || 'YOUR_MCH_ID',
-  api_key: process.env.WECHAT_API_KEY || 'YOUR_API_KEY',
-  notify_url: process.env.WECHAT_NOTIFY_URL || 'https://your-domain.com/api/pay/wechat-notify'
-};
-
-const ALIPAY_CONFIG = {
-  app_id: process.env.ALIPAY_APPID || 'YOUR_ALIPAY_APPID',
-  private_key: process.env.ALIPAY_PRIVATE_KEY || 'YOUR_PRIVATE_KEY',
-  alipay_public_key: process.env.ALIPAY_PUBLIC_KEY || 'YOUR_ALIPAY_PUBLIC_KEY',
-  notify_url: process.env.ALIPAY_NOTIFY_URL || 'https://your-domain.com/api/pay/alipay-notify'
-};
-
 const DB_PATH = path.join(__dirname, 'data.db');
 let db;
-
-// ===== 工具函数 =====
-function generateOrderId() {
-  return 'ORD' + Date.now() + Math.random().toString(36).substr(2, 6);
-}
-
-function generateNonceStr() {
-  return Math.random().toString(36).substr(2, 32);
-}
-
-function sign(params, key) {
-  const sorted = Object.keys(params).sort();
-  const str = sorted.map(k => `${k}=${params[k]}`).join('&');
-  return crypto.createHash('md5').update(str + '&key=' + key).digest('hex').toUpperCase();
-}
-
-function md5(str) {
-  return crypto.createHash('md5').update(str).digest('hex');
-}
 
 // ===== 数据库初始化 =====
 async function initDB() {
@@ -104,37 +68,29 @@ async function initDB() {
     )
   `);
 
-  // 用户表（会员系统）
+  // 管理员表
   db.run(`
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS admins (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      openid TEXT UNIQUE,
-      session_id TEXT,
-      is_vip INTEGER DEFAULT 0,
-      vip_expire_at DATETIME,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      username TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'admin',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  db.run('CREATE INDEX IF NOT EXISTS idx_users_openid ON users(openid)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_users_vip ON users(is_vip)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_admins_role ON admins(role)');
 
-  // 订单表
-  db.run(`
-    CREATE TABLE IF NOT EXISTS orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id TEXT NOT NULL UNIQUE,
-      user_id INTEGER,
-      amount INTEGER NOT NULL,
-      pay_type TEXT NOT NULL,
-      status TEXT DEFAULT 'pending',
-      pay_time DATETIME,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `);
-  db.run('CREATE INDEX IF NOT EXISTS idx_orders_order_id ON orders(order_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)');
+  // 创建默认主管理员（用户名：admin，密码：admin123）
+  try {
+    const defaultPassword = crypto.createHash('md5').update('admin123').digest('hex');
+    db.run(
+      'INSERT OR IGNORE INTO admins (username, password, role) VALUES (?, ?, ?)',
+      ['admin', defaultPassword, 'master']
+    );
+    console.log('✅ 默认管理员已创建（用户名：admin，密码：admin123）');
+  } catch(e) {
+    // 如果已存在则忽略
+  }
 
   saveDB();
   console.log('📦 数据库已初始化');
@@ -211,90 +167,61 @@ function addHotActivity(activity) {
   }
 }
 
-// ===== 用户管理 =====
-function getUserBySession(sessionId) {
-  try {
-    const stmt = db.prepare('SELECT * FROM users WHERE session_id = ?');
-    stmt.bind([sessionId]);
-    let user = null;
-    if (stmt.step()) {
-      user = stmt.getAsObject();
-    }
-    stmt.free();
-    return user;
-  } catch(e) {
-    console.error('查询用户失败:', e.message);
-    return null;
-  }
-}
-
-function getUserByOpenid(openid) {
-  try {
-    const stmt = db.prepare('SELECT * FROM users WHERE openid = ?');
-    stmt.bind([openid]);
-    let user = null;
-    if (stmt.step()) {
-      user = stmt.getAsObject();
-    }
-    stmt.free();
-    return user;
-  } catch(e) {
-    console.error('查询用户失败:', e.message);
-    return null;
-  }
-}
-
-function createUser(openid, sessionId) {
+function updateHotActivity(id, activity) {
   try {
     db.run(
-      'INSERT INTO users (openid, session_id) VALUES (?, ?)',
-      [openid, sessionId]
-    );
-    saveDB();
-    return getUserByOpenid(openid);
-  } catch(e) {
-    console.error('创建用户失败:', e.message);
-    return null;
-  }
-}
-
-function updateUserVip(userId, isVip, vipExpireAt) {
-  try {
-    db.run(
-      'UPDATE users SET is_vip = ?, vip_expire_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [isVip ? 1 : 0, vipExpireAt, userId]
+      'UPDATE hot_activities SET title = ?, url = ?, icon = ?, description = ?, sort_order = ? WHERE id = ?',
+      [activity.title, activity.url, activity.icon || '🎯', activity.description || '', activity.sort_order || 0, id]
     );
     saveDB();
     return true;
   } catch(e) {
-    console.error('更新用户会员失败:', e.message);
+    console.error('更新热门活动失败:', e.message);
     return false;
   }
 }
 
-function isUserVip(user) {
-  if (!user) return false;
-  if (user.is_vip !== 1) return false;
-  if (user.vip_expire_at) {
-    const expireDate = new Date(user.vip_expire_at.replace(' ', 'T'));
-    if (expireDate < new Date()) {
-      return false;
-    }
+function deleteHotActivity(id) {
+  try {
+    db.run('DELETE FROM hot_activities WHERE id = ?', [id]);
+    saveDB();
+    return true;
+  } catch(e) {
+    console.error('删除热门活动失败:', e.message);
+    return false;
   }
-  return true;
 }
 
-// ===== 获取或创建用户 =====
-function getOrCreateUser(req, res) {
-  const sessionId = req.headers['x-session-id'] || crypto.randomBytes(16).toString('hex');
-  let user = getUserBySession(sessionId);
+// ===== 管理员认证 =====
+function hashPassword(password) {
+  return crypto.createHash('md5').update(password).digest('hex');
+}
+
+function verifyAdmin(req, res, next) {
+  const sessionId = req.headers['x-admin-session'] || req.query.admin_session;
   
-  if (!user) {
-    const openid = sessionId; // 使用 session_id 作为 openid
-    user = createUser(openid, sessionId);
+  if (!sessionId) {
+    return res.status(401).json({ error: '未登录' });
   }
   
-  return user;
+  try {
+    const stmt = db.prepare('SELECT * FROM admins WHERE id = ?');
+    stmt.bind([sessionId]);
+    let admin = null;
+    if (stmt.step()) {
+      admin = stmt.getAsObject();
+    }
+    stmt.free();
+    
+    if (!admin) {
+      return res.status(401).json({ error: '登录已过期' });
+    }
+    
+    req.admin = admin;
+    next();
+  } catch(e) {
+    res.status(500).json({ error: '服务器错误' });
+  }
 }
 
 let csrfToken = crypto.randomBytes(32).toString('hex');
@@ -303,25 +230,6 @@ let csrfToken = crypto.randomBytes(32).toString('hex');
 app.get('/api/csrf', (req, res) => {
   csrfToken = crypto.randomBytes(32).toString('hex');
   res.json({ token: csrfToken });
-});
-
-// 获取用户信息
-app.get('/api/user/info', (req, res) => {
-  const sessionId = req.headers['x-session-id'] || req.query.session_id;
-  if (!sessionId) {
-    return res.status(401).json({ error: '未登录' });
-  }
-  
-  let user = getUserBySession(sessionId);
-  if (!user) {
-    user = createUser(sessionId, sessionId);
-  }
-  
-  res.json({
-    id: user.id,
-    is_vip: isUserVip(user),
-    vip_expire_at: user.vip_expire_at
-  });
 });
 
 // 统计
@@ -461,214 +369,249 @@ app.post('/api/hot', (req, res) => {
   }
 });
 
-// ===== 支付相关 =====
-// 创建订单
-app.post('/api/pay/create-order', (req, res) => {
-  const { pay_type, description } = req.body; // pay_type: 'wechat' or 'alipay'
+// ===== 管理员接口 =====
+// 管理员登录
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
   
-  if (!pay_type || !['wechat', 'alipay'].includes(pay_type)) {
-    return res.status(400).json({ error: '不支持的支付方式' });
+  if (!username || !password) {
+    return res.status(400).json({ error: '请输入用户名和密码' });
   }
-
-  const sessionId = req.headers['x-session-id'] || req.query.session_id;
-  const user = getUserBySession(sessionId);
   
-  if (!user) {
-    return res.status(401).json({ error: '请先登录' });
-  }
-
-  const amount = 100; // 1元 = 100分
-  const order_id = generateOrderId();
-  const nonce_str = generateNonceStr();
-  const body = description || '会员充值';
-
+  const passwordHash = hashPassword(password);
+  
   try {
-    // 创建订单记录
+    const stmt = db.prepare('SELECT * FROM admins WHERE username = ? AND password = ?');
+    stmt.bind([username, passwordHash]);
+    let admin = null;
+    if (stmt.step()) {
+      admin = stmt.getAsObject();
+    }
+    stmt.free();
+    
+    if (!admin) {
+      return res.status(401).json({ error: '用户名或密码错误' });
+    }
+    
+    // 生成会话 ID
+    const sessionId = crypto.randomBytes(32).toString('hex');
+    
+    // 将会话存储到数据库
     db.run(
-      'INSERT INTO orders (order_id, user_id, amount, pay_type, status) VALUES (?, ?, ?, ?, ?)',
-      [order_id, user.id, amount, pay_type, 'pending']
+      'INSERT INTO csrf_tokens (token, expires_at) VALUES (?, datetime("now", "+1 year"))',
+      [sessionId]
     );
     saveDB();
-
-    if (pay_type === 'wechat') {
-      // 微信支付
-      const params = {
-        appid: WECHAT_PAY_CONFIG.appid,
-        mch_id: WECHAT_PAY_CONFIG.mch_id,
-        nonce_str: nonce_str,
-        body: body,
-        out_trade_no: order_id,
-        total_fee: amount,
-        spbill_create_ip: '127.0.0.1',
-        notify_url: WECHAT_PAY_CONFIG.notify_url,
-        trade_type: 'NATIVE' // 扫码支付
-      };
-      
-      const sign_str = sign(params, WECHAT_PAY_CONFIG.api_key);
-      params.sign = sign_str;
-
-      // 这里应该调用微信支付 API，简化版直接返回
-      res.json({
-        success: true,
-        order_id: order_id,
-        pay_url: `weixin://wxpay/bizpay.htm?sr=xxxxx`, // 实际应返回微信支付二维码链接
-        config: WECHAT_PAY_CONFIG
-      });
-    } else if (pay_type === 'alipay') {
-      // 支付宝支付
-      const params = {
-        app_id: ALIPAY_CONFIG.app_id,
-        method: 'Alipay.Trade.Pre.Create',
-        charset: 'utf-8',
-        sign_type: 'RSA2',
-        timestamp: new Date().toISOString(),
-        version: '1.0',
-        notify_url: ALIPAY_CONFIG.notify_url,
-        biz_content: JSON.stringify({
-          subject: body,
-          out_trade_no: order_id,
-          total_amount: (amount / 100).toFixed(2),
-          product_code: 'FAST_INSTANT_TRADE_PAY'
-        })
-      };
-
-      const sign = md5(JSON.stringify(params) + ALIPAY_CONFIG.private_key);
-      params.sign = sign;
-
-      res.json({
-        success: true,
-        order_id: order_id,
-        pay_url: `https://openapi.alipay.com/gateway.do?${querystring.stringify(params)}`,
-        config: ALIPAY_CONFIG
-      });
-    }
+    
+    res.json({
+      success: true,
+      session_id: sessionId,
+      admin: {
+        id: admin.id,
+        username: admin.username,
+        role: admin.role
+      }
+    });
   } catch(e) {
-    console.error('创建订单失败:', e);
-    res.status(500).json({ error: '创建订单失败' });
+    console.error('登录失败:', e);
+    res.status(500).json({ error: '服务器错误' });
   }
 });
 
-// 微信支付回调
-app.post('/api/pay/wechat-notify', (req, res) => {
-  const data = req.body;
-  
-  // 验证签名
-  const sign = data.sign;
-  delete data.sign;
-  const verified_sign = sign(data, WECHAT_PAY_CONFIG.api_key);
-  
-  if (sign !== verified_sign) {
-    return res.status(400).send('签名失败');
-  }
-
-  if (data.result_code === 'SUCCESS') {
-    const order_id = data.out_trade_no;
-    
-    // 更新订单状态
-    db.run(
-      "UPDATE orders SET status = 'paid', pay_time = datetime('now', 'localtime') WHERE order_id = ? AND status = 'pending'",
-      [order_id]
-    );
-    
-    // 获取订单用户
-    const stmt = db.prepare('SELECT user_id FROM orders WHERE order_id = ?');
-    stmt.bind([order_id]);
-    let order = null;
-    if (stmt.step()) {
-      order = stmt.getAsObject();
+// 获取管理员信息
+app.get('/api/admin/info', verifyAdmin, (req, res) => {
+  res.json({
+    success: true,
+    admin: {
+      id: req.admin.id,
+      username: req.admin.username,
+      role: req.admin.role
     }
-    stmt.free();
-    
-    if (order) {
-      // 开通会员（1年）
-      const vip_expire_at = new Date();
-      vip_expire_at.setFullYear(vip_expire_at.getFullYear() + 1);
-      const vip_expire_str = vip_expire_at.toISOString().split('.')[0];
-      
-      updateUserVip(order.user_id, true, vip_expire_str);
-      
-      console.log(`用户 ${order.user_id} 支付成功，已开通会员`);
-    }
-    
-    res.xml('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[成功]]></return_msg></xml>');
-  }
+  });
 });
 
-// 支付宝支付回调
-app.post('/api/pay/alipay-notify', (req, res) => {
-  const data = req.body;
-  
-  // 验证签名
-  const sign = data.sign;
-  const verified_sign = md5(querystring.stringify(data) + ALIPAY_CONFIG.private_key);
-  
-  if (sign !== verified_sign) {
-    return res.status(400).send('签名失败');
-  }
-
-  if (data.trade_status === 'TRADE_SUCCESS') {
-    const order_id = data.out_trade_no;
-    
-    // 更新订单状态
-    db.run(
-      "UPDATE orders SET status = 'paid', pay_time = datetime('now', 'localtime') WHERE order_id = ? AND status = 'pending'",
-      [order_id]
-    );
-    
-    // 获取订单用户
-    const stmt = db.prepare('SELECT user_id FROM orders WHERE order_id = ?');
-    stmt.bind([order_id]);
-    let order = null;
-    if (stmt.step()) {
-      order = stmt.getAsObject();
-    }
-    stmt.free();
-    
-    if (order) {
-      // 开通会员（1年）
-      const vip_expire_at = new Date();
-      vip_expire_at.setFullYear(vip_expire_at.getFullYear() + 1);
-      const vip_expire_str = vip_expire_at.toISOString().split('.')[0];
-      
-      updateUserVip(order.user_id, true, vip_expire_str);
-      
-      console.log(`用户 ${order.user_id} 支付成功，已开通会员`);
-    }
-    
-    res.send('success');
-  }
-});
-
-// 查询订单状态
-app.get('/api/pay/order/:order_id', (req, res) => {
-  const { order_id } = req.params;
-  
+// 获取所有管理员列表
+app.get('/api/admins', verifyAdmin, (req, res) => {
   try {
-    const stmt = db.prepare('SELECT * FROM orders WHERE order_id = ?');
-    stmt.bind([order_id]);
-    let order = null;
-    if (stmt.step()) {
-      order = stmt.getAsObject();
+    const results = [];
+    const stmt = db.prepare('SELECT id, username, role, created_at FROM admins ORDER BY id');
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
     }
     stmt.free();
-    
-    if (order) {
-      res.json({
-        success: true,
-        order: {
-          order_id: order.order_id,
-          amount: order.amount,
-          pay_type: order.pay_type,
-          status: order.status,
-          pay_time: order.pay_time
-        }
-      });
-    } else {
-      res.status(404).json({ error: '订单不存在' });
-    }
+    res.json(results);
   } catch(e) {
     res.status(500).json({ error: '查询失败' });
   }
+});
+
+// 添加管理员（仅主管理员可操作）
+app.post('/api/admins', verifyAdmin, (req, res) => {
+  if (req.admin.role !== 'master') {
+    return res.status(403).json({ error: '只有主管理员可以添加管理员' });
+  }
+  
+  const { username, password, role } = req.body;
+  
+  if (!username || !password) {
+    return res.status(400).json({ error: '请输入用户名和密码' });
+  }
+  
+  if (!['admin', 'sub_admin'].includes(role)) {
+    return res.status(400).json({ error: '角色无效' });
+  }
+  
+  const passwordHash = hashPassword(password);
+  
+  try {
+    db.run(
+      'INSERT INTO admins (username, password, role) VALUES (?, ?, ?)',
+      [username, passwordHash, role]
+    );
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    if (e.message.includes('UNIQUE')) {
+      res.status(400).json({ error: '用户名已存在' });
+    } else {
+      res.status(500).json({ error: '添加失败' });
+    }
+  }
+});
+
+// 删除管理员（仅主管理员可操作）
+app.delete('/api/admins/:id', verifyAdmin, (req, res) => {
+  if (req.admin.role !== 'master') {
+    return res.status(403).json({ error: '只有主管理员可以删除管理员' });
+  }
+  
+  const adminId = req.params.id;
+  
+  // 不能删除自己
+  if (parseInt(adminId) === req.admin.id) {
+    return res.status(400).json({ error: '不能删除自己的账号' });
+  }
+  
+  try {
+    db.run('DELETE FROM admins WHERE id = ?', [adminId]);
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: '删除失败' });
+  }
+});
+
+// 管理员：添加热门活动
+app.post('/api/admin/hot', verifyAdmin, (req, res) => {
+  const { title, url, icon, description, sort_order } = req.body;
+  const success = addHotActivity({ title, url, icon, description, sort_order });
+  if (success) {
+    res.json({ success: true });
+  } else {
+    res.status(500).json({ error: '添加失败' });
+  }
+});
+
+// 管理员：更新热门活动
+app.put('/api/admin/hot/:id', verifyAdmin, (req, res) => {
+  const { id } = req.params;
+  const { title, url, icon, description, sort_order } = req.body;
+  const success = updateHotActivity(id, { title, url, icon, description, sort_order });
+  if (success) {
+    res.json({ success: true });
+  } else {
+    res.status(500).json({ error: '更新失败' });
+  }
+});
+
+// 管理员：删除热门活动
+app.delete('/api/admin/hot/:id', verifyAdmin, (req, res) => {
+  const { id } = req.params;
+  const success = deleteHotActivity(id);
+  if (success) {
+    res.json({ success: true });
+  } else {
+    res.status(500).json({ error: '删除失败' });
+  }
+});
+
+// 管理员：添加 PDD 助力码
+app.post('/api/admin/pdd', verifyAdmin, (req, res) => {
+  const { code } = req.body;
+  
+  if (!code || !/^\d{9}$/.test(code) || !code.startsWith('9')) {
+    return res.status(400).json({ error: '请输入9位数字助力码（以9开头）' });
+  }
+  
+  const check = db.prepare('SELECT id FROM pdd_codes WHERE code = ?');
+  check.bind([code]);
+  if (check.step()) {
+    check.free();
+    return res.status(400).json({ error: '该助力码已存在' });
+  }
+  check.free();
+  
+  db.run('INSERT INTO pdd_codes (code) VALUES (?)', [code]);
+  saveDB();
+  res.json({ success: true });
+});
+
+// 管理员：删除 PDD 助力码
+app.delete('/api/admin/pdd/:id', verifyAdmin, (req, res) => {
+  const { id } = req.params;
+  try {
+    db.run('DELETE FROM pdd_codes WHERE id = ?', [id]);
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: '删除失败' });
+  }
+});
+
+// 管理员：添加京东链接
+app.post('/api/admin/jd', verifyAdmin, (req, res) => {
+  const { link, title } = req.body;
+  
+  if (!link) {
+    return res.status(400).json({ error: '请输入链接' });
+  }
+  
+  const isJdLink = link.includes('jd.com') || link.includes('u.jd.com') || 
+                   link.includes('#小程序://') || link.includes('openapp.jdmoble');
+  
+  if (!isJdLink) {
+    return res.status(400).json({ error: '请输入京东链接（包含 jd.com 或小程序链接）' });
+  }
+  
+  const check = db.prepare('SELECT id FROM jd_links WHERE link = ?');
+  check.bind([link]);
+  if (check.step()) {
+    check.free();
+    return res.status(400).json({ error: '该链接已存在' });
+  }
+  check.free();
+  
+  db.run('INSERT INTO jd_links (link, title) VALUES (?, ?)', [link, title || '']);
+  saveDB();
+  res.json({ success: true });
+});
+
+// 管理员：删除京东链接
+app.delete('/api/admin/jd/:id', verifyAdmin, (req, res) => {
+  const { id } = req.params;
+  try {
+    db.run('DELETE FROM jd_links WHERE id = ?', [id]);
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: '删除失败' });
+  }
+});
+
+// 管理员：退出登录
+app.post('/api/admin/logout', verifyAdmin, (req, res) => {
+  // 这里可以清理事件会话，简化处理不删除
+  res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3000;
@@ -689,7 +632,7 @@ initDB().then(() => {
     console.log(`\n✅ 活动互助站已启动`);
     console.log('   - 本机访问: http://localhost:' + PORT);
     console.log('   - 手机访问: http://' + localIP + ':' + PORT);
-    console.log('   - 会员页面: http://' + localIP + ':' + PORT + '/vip.html\n');
+    console.log('   - 管理后台: http://' + localIP + ':' + PORT + '/admin.html\n');
     console.log('   📱 请确保手机和电脑连接同一个WiFi/网络\n');
   });
 }).catch(err => {

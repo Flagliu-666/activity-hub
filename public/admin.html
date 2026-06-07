@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>管理后台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            padding-bottom: 80px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-title h1 { font-size: 20px; font-weight: 700; }
+        .header-title p { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 14px 8px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        .content {
+            padding: 16px;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .form-input:focus, .form-textarea:focus {
+            border-color: #667eea;
+        }
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #666;
+        }
+        .item-list {
+            margin-top: 16px;
+        }
+        .item-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .item-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        .item-meta {
+            font-size: 12px;
+            color: #999;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.82);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            border-top: 1px solid #e5e7eb;
+            z-index: 50;
+        }
+        .bottom-nav a {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0 12px;
+            text-decoration: none;
+            color: #999;
+            font-size: 11px;
+        }
+        .bottom-nav a.active { color: #667eea; }
+        .bottom-nav .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-master { background: #fef3c7; color: #92400e; }
+        .badge-sub { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <div class="header-title">
+                <h1>🔧 管理后台</h1>
+                <p id="adminInfo">加载中...</p>
+            </div>
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('hot')">🔥 热门活动</button>
+        <button class="tab-btn" onclick="switchTab('pdd')">🎁 PDD</button>
+        <button class="tab-btn" onclick="switchTab('jd')">🛒 京东</button>
+        <button class="tab-btn" onclick="switchTab('admins')">👥 管理员</button>
+    </div>
+
+    <div class="content">
+        <!-- 热门活动 -->
+        <div id="tab-hot" class="section active">
+            <div class="card">
+                <div class="card-title">添加热门活动</div>
+                <div class="form-group">
+                    <label class="form-label">标题 *</label>
+                    <input type="text" class="form-input" id="hotTitle" placeholder="输入活动标题">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">链接 *</label>
+                    <input type="text" class="form-input" id="hotUrl" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">图标（emoji）</label>
+                    <input type="text" class="form-input" id="hotIcon" placeholder="🎯" value="🎯">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">描述</label>
+                    <textarea class="form-textarea" id="hotDesc" placeholder="活动描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">排序（数字越大越靠前）</label>
+                    <input type="number" class="form-input" id="hotSort" value="0">
+                </div>
+                <button class="btn btn-primary" onclick="addHotActivity()" style="width: 100%;">添加活动</button>
+            </div>
+            <div class="item-list" id="hotList"></div>
+        </div>
+
+        <!-- PDD -->
+        <div id="tab-pdd" class="section">
+            <div class="card">
+                <div class="card-title">添加助力码</div>
+                <div class="form-group">
+                    <label class="form-label">9位助力码（以9开头）</label>
+                    <input type="text" class="form-input" id="pddCode" placeholder="9XXXXXXXX" maxlength="9" pattern="[0-9]*">
+                </div>
+                <button class="btn btn-primary" onclick="addPddCode()" style="width: 100%;">添加助力码</button>
+            </div>
+            <div class="item-list" id="pddList"></div>
+        </div>
+
+        <!-- 京东 -->
+        <div id="tab-jd" class="section">
+            <div class="card">
+                <div class="card-title">添加京东链接</div>
+                <div class="form-group">
+                    <label class="form-label">链接</label>
+                    <input type="text" class="form-input" id="jdLink" placeholder="https://u.jd.com/... 或小程序链接">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">标题（可选）</label>
+                    <input type="text" class="form-input" id="jdTitle" placeholder="链接标题">
+                </div>
+                <button class="btn btn-primary" onclick="addJdLink()" style="width: 100%;">添加链接</button>
+            </div>
+            <div class="item-list" id="jdList"></div>
+        </div>
+
+        <!-- 管理员 -->
+        <div id="tab-admins" class="section">
+            <div class="card" id="addAdminCard">
+                <div class="card-title">添加管理员</div>
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="adminUsername" placeholder="新管理员用户名">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="adminPassword" placeholder="设置密码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">角色</label>
+                    <select class="form-select" id="adminRole">
+                        <option value="sub_admin">副管理员（只能修改内容）</option>
+                        <option value="admin">管理员（可以管理所有内容）</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="addAdmin()" style="width: 100%;">添加管理员</button>
+            </div>
+            <div class="card">
+                <div class="card-title">管理员列表</div>
+                <div id="adminList"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/">
+            <span class="nav-icon">🏠</span> 首页
+        </a>
+        <a href="javascript:void(0)" class="active" onclick="showToast('管理后台')">
+            <span class="nav-icon">🔧</span> 管理
+        </a>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let adminSession = localStorage.getItem('admin_session');
+        let adminRole = localStorage.getItem('admin_role');
+        let adminUsername = localStorage.getItem('admin_username');
+
+        // 检查登录状态
+        if (!adminSession) {
+            window.location.href = '/login.html';
+        }
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/info', {
+                    headers: { 'X-Admin-Session': adminSession }
+                });
+                if (!res.ok) {
+                    localStorage.clear();
+                    window.location.href = '/login.html';
+                }
+            } catch(e) {
+                localStorage.clear();
+                window.location.href = '/login.html';
+            }
+        }
+
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.clear();
+                window.location.href = '/login.html';
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            if (tabName === 'hot') loadHotActivities();
+            if (tabName === 'pdd') loadPddCodes();
+            if (tabName === 'jd') loadJdLinks();
+            if (tabName === 'admins') {
+                if (adminRole === 'master') loadAdmins();
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // 热门活动
+        async function loadHotActivities() {
+            try {
+                const res = await fetch('/api/hot');
+                const activities = await res.json();
+                const container = document.getElementById('hotList');
+                
+                if (activities.length === 0) {
+                    container.innerHTML = '<div class="empty-state">暂无活动</div>';
+                    return;
+                }
+                
+                container.innerHTML = activities.map(a => `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-title">${a.icon} ${a.title}</div>
+                            <div class="item-actions">
+                                <button class="btn btn-danger btn-small" onclick="deleteHotActivity(${a.id})">删除</button>
+                            </div>
+                        </div>
+                        <div class="item-meta">${a.description || '无描述'}</div>
+                    </div>
+                `).join('');
+            } catch(e) {
+                showToast('加载失败');
+            }
+        }
+
+        async function addHotActivity() {
+            const title = document.getElementById('hotTitle').value.trim();
+            const url = document.getElementById('hotUrl').value.trim();
+            const icon = document.getElementById('hotIcon').value.trim() || '🎯';
+            const desc = document.getElementById('hotDesc').value.trim();
+            const sort = parseInt(document.getElementById('hotSort').value) || 0;
+            
+            if (!title || !url) {
+                showToast('⚠️ 请填写标题和链接');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/admin/hot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Session': adminSession
+                    },
+                    body: JSON.stringify({ title, url, icon, description: desc, sort_order: sort })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 添加成功');
+                    document.getElementById('hotTitle').value = '';
+                    document.getElementById('hotUrl').value = '';
+                    document.getElementById('hotDesc').value = '';
+                    loadHotActivities();
+                } else {
+                    showToast('⚠️ ' + (data.error || '添加失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        async function deleteHotActivity(id) {
+            if (!confirm('确定要删除这个活动吗？')) return;
+            
+            try {
+                const res = await fetch(`/api/admin/hot/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Session': adminSession }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 删除成功');
+                    loadHotActivities();
+                } else {
+                    showToast('⚠️ 删除失败');
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        // PDD
+        async function loadPddCodes() {
+            try {
+                const res = await fetch('/api/pdd/codes?status=available');
+                const codes = await res.json();
+                const container = document.getElementById('pddList');
+                
+                if (codes.length === 0) {
+                    container.innerHTML = '<div class="empty-state">暂无助力码</div>';
+                    return;
+                }
+                
+                container.innerHTML = codes.map(c => `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-title" style="font-family: monospace; font-size: 16px;">${c.code}</div>
+                            <div class="item-actions">
+                                <button class="btn btn-danger btn-small" onclick="deletePddCode(${c.id})">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) {
+                showToast('加载失败');
+            }
+        }
+
+        async function addPddCode() {
+            const code = document.getElementById('pddCode').value.trim();
+            
+            if (!code || !/^\d{9}$/.test(code) || !code.startsWith('9')) {
+                showToast('⚠️ 请输入9位数字助力码（以9开头）');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/admin/pdd', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Session': adminSession
+                    },
+                    body: JSON.stringify({ code })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 添加成功');
+                    document.getElementById('pddCode').value = '';
+                    loadPddCodes();
+                } else {
+                    showToast('⚠️ ' + (data.error || '添加失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        async function deletePddCode(id) {
+            if (!confirm('确定要删除这个助力码吗？')) return;
+            
+            try {
+                const res = await fetch(`/api/admin/pdd/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Session': adminSession }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 删除成功');
+                    loadPddCodes();
+                } else {
+                    showToast('⚠️ 删除失败');
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        // 京东
+        async function loadJdLinks() {
+            try {
+                const res = await fetch('/api/jd/links?status=available');
+                const links = await res.json();
+                const container = document.getElementById('jdList');
+                
+                if (links.length === 0) {
+                    container.innerHTML = '<div class="empty-state">暂无链接</div>';
+                    return;
+                }
+                
+                container.innerHTML = links.map(c => `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-title" style="font-size: 12px; word-break: break-all;">${c.link}</div>
+                            <div class="item-actions">
+                                <button class="btn btn-danger btn-small" onclick="deleteJdLink(${c.id})">删除</button>
+                            </div>
+                        </div>
+                        ${c.title ? `<div class="item-meta">${c.title}</div>` : ''}
+                    </div>
+                `).join('');
+            } catch(e) {
+                showToast('加载失败');
+            }
+        }
+
+        async function addJdLink() {
+            const link = document.getElementById('jdLink').value.trim();
+            const title = document.getElementById('jdTitle').value.trim();
+            
+            if (!link) {
+                showToast('⚠️ 请输入链接');
+                return;
+            }
+            
+            const isJdLink = link.includes('jd.com') || link.includes('u.jd.com') || 
+                           link.includes('#小程序://') || link.includes('openapp.jdmoble');
+            
+            if (!isJdLink) {
+                showToast('⚠️ 请输入京东链接');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/admin/jd', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Session': adminSession
+                    },
+                    body: JSON.stringify({ link, title })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 添加成功');
+                    document.getElementById('jdLink').value = '';
+                    document.getElementById('jdTitle').value = '';
+                    loadJdLinks();
+                } else {
+                    showToast('⚠️ ' + (data.error || '添加失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        async function deleteJdLink(id) {
+            if (!confirm('确定要删除这个链接吗？')) return;
+            
+            try {
+                const res = await fetch(`/api/admin/jd/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Session': adminSession }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 删除成功');
+                    loadJdLinks();
+                } else {
+                    showToast('⚠️ 删除失败');
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        // 管理员管理（仅主管理员）
+        async function loadAdmins() {
+            try {
+                const res = await fetch('/api/admins', {
+                    headers: { 'X-Admin-Session': adminSession }
+                });
+                const admins = await res.json();
+                const container = document.getElementById('adminList');
+                
+                container.innerHTML = admins.map(a => {
+                    const badgeClass = a.role === 'master' ? 'badge-master' : 'badge-sub';
+                    const roleText = a.role === 'master' ? '主管理员' : '副管理员';
+                    const canDelete = a.role !== 'master'; // 不能删除主管理员
+                    
+                    return `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div>
+                                    <div class="item-title">${a.username}</div>
+                                    <span class="badge ${badgeClass}">${roleText}</span>
+                                </div>
+                                ${canDelete ? `<button class="btn btn-danger btn-small" onclick="deleteAdmin(${a.id})">删除</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                showToast('加载失败');
+            }
+        }
+
+        async function addAdmin() {
+            if (adminRole !== 'master') {
+                showToast('⚠️ 只有主管理员可以添加管理员');
+                return;
+            }
+            
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            const role = document.getElementById('adminRole').value;
+            
+            if (!username || !password) {
+                showToast('⚠️ 请填写用户名和密码');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/admins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Session': adminSession
+                    },
+                    body: JSON.stringify({ username, password, role })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 添加成功');
+                    document.getElementById('adminUsername').value = '';
+                    document.getElementById('adminPassword').value = '';
+                    loadAdmins();
+                } else {
+                    showToast('⚠️ ' + (data.error || '添加失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        async function deleteAdmin(id) {
+            if (!confirm('确定要删除这个管理员吗？')) return;
+            
+            try {
+                const res = await fetch(`/api/admins/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Session': adminSession }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 删除成功');
+                    loadAdmins();
+                } else {
+                    showToast('⚠️ ' + (data.error || '删除失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        // 初始化
+        async function init() {
+            await checkAuth();
+            document.getElementById('adminInfo').textContent = `${adminUsername} (${adminRole === 'master' ? '主管理员' : '副管理员'})`;
+            loadHotActivities();
+        }
+
+        init();
+    </script>
+</body>
+</html>
