@@ -50,6 +50,7 @@
         .bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0 12px; text-decoration: none; color: #999; font-size: 11px; }
         .bottom-nav a.active { color: #667eea; }
         .bottom-nav .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        .publish-fab { position: fixed; bottom: 90px; right: 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; width: 56px; height: 56px; border-radius: 50%; font-size: 28px; box-shadow: 0 4px 12px rgba(102,126,234,0.4); cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.82); color: white; padding: 12px 24px; border-radius: 20px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .toast.show { opacity: 1; }
         .login-box { background: white; padding: 40px 30px; border-radius: 16px; width: 90%; max-width: 400px; }
@@ -69,6 +70,9 @@
             <div class="header-title"><h1>🏪 二手闲置平台</h1><p>闲置物品，循环利用</p></div>
             <div id="userArea"></div>
         </div>
+        <div style="padding:10px 16px;">
+            <a href="/login.html" class="admin-link" style="float:right;">管理后台</a>
+        </div>
     </div>
     <div class="category-tabs">
         <button class="category-tab active" onclick="filterByCategory('all')">全部</button>
@@ -82,10 +86,11 @@
         <div id="adContainer"></div>
         <div class="product-grid" id="productGrid"></div>
     </div>
+    <button class="publish-fab" onclick="openPublishModal()">+</button>
     <nav class="bottom-nav">
+        <a href="#" onclick="switchTab('platform')"><span class="nav-icon">💬</span>客服</a>
         <a href="#" class="active" onclick="switchTab('home')"><span class="nav-icon">🏠</span>首页</a>
         <a href="#" onclick="switchTab('my')"><span class="nav-icon">👤</span>我的</a>
-        <a href="#" onclick="switchTab('platform')"><span class="nav-icon">💬</span>平台</a>
     </nav>
     <div class="modal" id="loginModal">
         <div class="login-box">
@@ -184,61 +189,6 @@
             else if (tab === 'platform') { document.getElementById('platformModal').classList.add('show'); }
         }
         function closePlatformModal() { document.getElementById('platformModal').classList.remove('show'); }
-        async function loadProducts() {
-            try {
-                const params = currentCategory === 'all' ? '' : `?category=${currentCategory}`;
-                const res = await fetch('/api/products' + params);
-                const products = await res.json();
-                renderProducts(products);
-            } catch(e) { showToast('加载失败'); }
-        }
-        function renderProducts(products) {
-            const container = document.getElementById('productGrid');
-            if (products.length === 0) { container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>暂无商品</p></div>'; return; }
-            container.innerHTML = products.map(p => {
-                const images = JSON.parse(p.images || '[]'), imageUrl = images[0] || '', statusClass = p.status === 'available' ? 'status-available' : 'status-sold', statusText = p.status === 'available' ? '在售' : '已售';
-                return `<div class="product-card" onclick="showDetail(${p.id})">${imageUrl ? `<img class="product-image" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image" style="display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>'}<div class="product-info"><div class="product-category">${p.category}</div><div class="product-title">${p.title}</div><div class="product-price">${p.price || 0}</div><span class="product-status ${statusClass}">${statusText}</span></div></div>`;
-            }).join('');
-        }
-        function filterByCategory(category) { currentCategory = category; document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active')); event.target.classList.add('active'); loadProducts(); }
-        function openPublishModal() { if (!currentUser) { openLoginModal(); return; } document.getElementById('publishModal').classList.add('show'); uploadedImages = []; document.getElementById('imagePreview').innerHTML = ''; }
-        function closePublishModal() { document.getElementById('publishModal').classList.remove('show'); }
-        function handleImageUpload(event) {
-            const files = Array.from(event.target.files);
-            files.forEach(file => {
-                if (uploadedImages.length >= 3) { showToast('最多上传3张图片'); return; }
-                const reader = new FileReader();
-                reader.onload = function(e) { uploadedImages.push(e.target.result); renderImagePreview(); };
-                reader.readAsDataURL(file);
-            });
-            event.target.value = '';
-        }
-        function renderImagePreview() { document.getElementById('imagePreview').innerHTML = uploadedImages.map((img, idx) => `<div class="image-item" style="width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;display:inline-block;margin:4px;"><img src="${img}" style="width:100%;height:100%;object-fit:cover;"><button onclick="removeImage(${idx})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;">×</button></div>`).join(''); }
-        function removeImage(index) { uploadedImages.splice(index, 1); renderImagePreview(); }
-        async function publishProduct() {
-            const title = document.getElementById('productTitle').value.trim(), category = document.getElementById('productCategory').value, price = parseFloat(document.getElementById('productPrice').value) || 0, desc = document.getElementById('productDesc').value.trim(), contact = document.getElementById('productContact').value.trim();
-            if (!title || !contact) { showToast('⚠️ 请填写标题和联系方式'); return; }
-            try {
-                const res = await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ user_id: JSON.parse(currentUser).id, title, category, price, description: desc, images: uploadedImages, contact }) });
-                const data = await res.json();
-                if (data.success) { showToast('✅ 发布成功'); closePublishModal(); document.getElementById('productTitle').value = ''; document.getElementById('productPrice').value = ''; document.getElementById('productDesc').value = ''; document.getElementById('productContact').value = ''; loadProducts(); }
-                else showToast('⚠️ ' + (data.error || '发布失败'));
-            } catch(e) { showToast('⚠️ 网络错误'); }
-        }
-        async function showDetail(id) {
-            try {
-                const res = await fetch('/api/products');
-                const products = await res.json(), product = products.find(p => p.id === id);
-                if (!product) return;
-                const images = JSON.parse(product.images || '[]'), statusClass = product.status === 'available' ? 'status-available' : 'status-sold', statusText = product.status === 'available' ? '在售' : '已售';
-                let html = `<div style="margin-bottom:16px;">`;
-                if (images.length > 0) html += `<img style="width:100%;max-height:400px;object-fit:contain;border-radius:8px;" src="${images[0]}" alt="${product.title}">`;
-                html += `<div style="padding:16px;"><div style="font-size:28px;font-weight:700;color:#ef4444;margin-bottom:12px;">¥${product.price || 0}</div><div style="margin-bottom:12px;"><span class="product-category">${product.category}</span> <span class="product-status ${statusClass}">${statusText}</span></div><h3 style="font-size:18px;color:#333;margin-bottom:12px;">${product.title}</h3>${product.description ? `<p style="color:#666;line-height:1.6;margin-bottom:16px;">${product.description}</p>` : ''}<div style="background:#f9fafb;padding:12px;border-radius:8px;"><div style="font-size:13px;color:#999;margin-bottom:4px;">平台联系方式</div><div style="font-size:16px;color:#333;font-weight:600;">${product.contact}</div></div></div></div>`;
-                document.getElementById('detailContent').innerHTML = html;
-                document.getElementById('detailModal').classList.add('show');
-            } catch(e) { showToast('加载失败'); }
-        }
-        function closeDetailModal() { document.getElementById('detailModal').classList.remove('show'); }
         async function loadMyProducts() {
             if (!currentUser) return;
             try {
@@ -252,7 +202,7 @@
             if (products.length === 0) { container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>你还没有发布商品</p><button class="btn btn-primary" style="margin-top:16px;max-width:200px;margin-left:auto;margin-right:auto;" onclick="openPublishModal()">发布商品</button></div>'; return; }
             container.innerHTML = products.map(p => {
                 const images = JSON.parse(p.images || '[]'), imageUrl = images[0] || '', statusClass = p.status === 'available' ? 'status-available' : 'status-sold', statusText = p.status === 'available' ? '在售' : '已售';
-                return `<div class="product-card"><div style="position:relative;">${imageUrl ? `<img class="product-image" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image" style="display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>'}<button onclick="event.stopPropagation();openEditModal(${p.id})" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:white;border:none;padding:6px 10px;border-radius:6px;font-size:12px;">编辑</button></div><div class="product-info"><div class="product-category">${p.category}</div><div class="product-title">${p.title}</div><div class="product-price">${p.price || 0}</div><div class="my-product-actions"><span class="product-status ${statusClass}">${statusText}</span><div style="flex:1;"></div>${p.status === 'available' ? `<button class="btn btn-success btn-small" onclick="updateStatus(${p.id}, 'sold')">已售出</button>` : `<button class="btn btn-secondary btn-small" onclick="updateStatus(${p.id}, 'available')">重新在售</button>`}<button class="btn btn-danger btn-small" onclick="deleteProduct(${p.id})">删除</button></div></div></div>`;
+                return `<div class="product-card"><div style="position:relative;">${imageUrl ? `<img class="product-image" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image" style="display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>'}</div><div class="product-info"><div class="product-category">${p.category}</div><div class="product-title">${p.title}</div><div class="product-price">${p.price || 0}</div><div class="my-product-actions"><span class="product-status ${statusClass}">${statusText}</span><div style="flex:1;"></div>${p.status === 'available' ? `<button class="btn btn-success btn-small" onclick="updateStatus(${p.id}, 'sold')">已售出</button>` : `<button class="btn btn-secondary btn-small" onclick="updateStatus(${p.id}, 'available')">重新在售</button>`}<button class="btn btn-danger btn-small" onclick="deleteProduct(${p.id})">删除</button></div></div></div>`;
             }).join('');
         }
         async function updateStatus(id, status) {
