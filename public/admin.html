@@ -19,6 +19,14 @@
             top: 0;
             z-index: 10;
         }
+        .debug-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 11px;
+            font-family: monospace;
+        }
         .header-top {
             display: flex;
             align-items: center;
@@ -218,9 +226,12 @@
         <div class="header-top">
             <div class="header-title">
                 <h1>🔧 管理后台</h1>
-                <p id="adminInfo">加载中...</p>
+                <p id="adminInfo">正在验证权限...</p>
             </div>
             <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+        <div class="debug-info" id="debugInfo" style="display:none;">
+            调试信息已开启
         </div>
     </div>
 
@@ -337,21 +348,36 @@
 
         // 检查登录状态
         if (!adminSession) {
+            console.log('❌ 没有会话 ID，重定向到登录页');
             window.location.href = '/login.html';
+        } else {
+            console.log('✅ 找到会话 ID:', adminSession.substring(0, 10) + '...');
         }
 
         async function checkAuth() {
+            console.log('🔍 开始验证管理员权限...');
             try {
                 const res = await fetch('/api/admin/info', {
                     headers: { 'X-Admin-Session': adminSession }
                 });
+                
+                console.log('📡 验证响应状态:', res.status);
+                
                 if (!res.ok) {
+                    console.log('❌ 验证失败，状态码:', res.status);
                     localStorage.clear();
                     window.location.href = '/login.html';
+                    return false;
                 }
+                
+                const data = await res.json();
+                console.log('✅ 验证成功:', data);
+                return true;
             } catch(e) {
+                console.error('❌ 验证异常:', e);
                 localStorage.clear();
                 window.location.href = '/login.html';
+                return false;
             }
         }
 
@@ -727,12 +753,40 @@
         }
 
         // 初始化
+        let isAuthChecked = false;
+        
         async function init() {
-            await checkAuth();
+            // 显示调试信息
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML = `📝 会话: ${adminSession ? adminSession.substring(0, 20) + '...' : '无'}<br>
+                                   👤 用户: ${adminUsername || '无'}<br>
+                                   🎭 角色: ${adminRole || '无'}`;
+            
+            // 先验证权限
+            const authSuccess = await checkAuth();
+            
+            if (!authSuccess) {
+                debugInfo.innerHTML += '<br>❌ 权限验证失败';
+                debugInfo.style.color = '#ff6b6b';
+                return; // 验证失败，不再继续
+            }
+            
+            isAuthChecked = true;
+            debugInfo.innerHTML += '<br>✅ 权限验证通过';
+            debugInfo.style.color = '#51cf66';
+            
+            // 验证通过后才显示内容
             document.getElementById('adminInfo').textContent = `${adminUsername} (${adminRole === 'master' ? '主管理员' : '副管理员'})`;
             loadHotActivities();
         }
 
+        // 页面加载后立即开始验证
+        console.log('🚀 管理后台页面加载');
+        console.log('📝 会话 ID:', adminSession ? adminSession.substring(0, 20) + '...' : '无');
+        console.log('👤 用户名:', adminUsername);
+        console.log('🎭 角色:', adminRole);
+        
         init();
     </script>
 </body>
