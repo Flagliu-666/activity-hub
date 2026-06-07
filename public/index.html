@@ -41,27 +41,6 @@
         }
         .stat-num { font-size: 22px; font-weight: 700; color: #6366f1; }
         .stat-label { font-size: 12px; color: #6b7280; margin-top: 4px; }
-        .group-banner {
-            margin: 12px 16px; border-radius: 14px;
-            padding: 14px 18px;
-            display: flex; align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            background: linear-gradient(135deg, #1890ff, #096dd9);
-            box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
-        }
-        .banner-left {
-            display: flex; align-items: center; gap: 12px; flex: 1;
-        }
-        .banner-icon {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-        }
-        .banner-text .banner-title { font-size: 15px; font-weight: 600; color: white; }
-        .banner-text .banner-desc { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; }
-        .banner-arrow { color: white; font-size: 14px; }
         .section { padding: 20px 16px 10px; }
         .section-title {
             font-size: 17px; font-weight: 700;
@@ -170,17 +149,6 @@
         </div>
     </div>
 
-    <div class="group-banner" onclick="showModal()">
-        <div class="banner-left">
-            <div class="banner-icon">👥</div>
-            <div class="banner-text">
-                <div class="banner-title">加入交流群</div>
-                <div class="banner-desc">群内互助，更多福利</div>
-            </div>
-        </div>
-        <div class="banner-arrow">加入群聊 ›</div>
-    </div>
-
     <!-- 今日热门活动 -->
     <section class="section">
         <div class="section-title">
@@ -236,27 +204,9 @@
         <div class="footer-copy">© 2026 活动互助站 · 互助让生活更美好</div>
     </footer>
 
-    <div class="modal-overlay" id="modalGroup" onclick="hideModal()">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div style="font-size: 17px; font-weight: 700; margin-bottom: 16px;">👥 扫码加入交流群</div>
-            <div class="modal-qr-placeholder">
-                <img src="images/group-qr.jpg" alt="交流群二维码">
-            </div>
-            <div class="modal-close" onclick="hideModal()">关闭</div>
-        </div>
-    </div>
-
     <div class="toast" id="toast"></div>
 
     <script>
-        function showModal() {
-            document.getElementById('modalGroup').classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-        function hideModal() {
-            document.getElementById('modalGroup').classList.remove('show');
-            document.body.style.overflow = '';
-        }
         let toastTimer;
         function showToast(msg) {
             const toast = document.getElementById('toast');
