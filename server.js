@@ -21,10 +21,11 @@ async function initDB() {
   }
   db = new SQL.Database(buffer);
 
-  // 商品表
+  // 商品表（关联用户）
   db.run(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
       title TEXT NOT NULL,
       description TEXT DEFAULT '',
       category TEXT NOT NULL DEFAULT '百货',
@@ -32,9 +33,11 @@ async function initDB() {
       images TEXT DEFAULT '[]',
       contact TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'available',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_products_user ON products(user_id)');
   db.run('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)');
   db.run('CREATE INDEX IF NOT EXISTS idx_products_status ON products(status)');
   db.run('CREATE INDEX IF NOT EXISTS idx_products_created ON products(created_at DESC)');
@@ -76,6 +79,22 @@ async function initDB() {
   `);
   db.run('CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id)');
 
+  // 广告位表
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ads (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      image_url TEXT DEFAULT '',
+      link_url TEXT DEFAULT '',
+      sort_order INTEGER DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_ads_status ON ads(status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ads_sort ON ads(sort_order DESC)');
+
   // 创建默认主管理员
   try {
     const defaultPassword = crypto.createHash('md5').update('admin123').digest('hex');
@@ -100,6 +119,49 @@ function saveDB() {
 // ===== 管理员认证 =====
 function hashPassword(password) {
   return crypto.createHash('md5').update(password).digest('hex');
+}
+
+// 用户认证中间件
+function verifyUser(req, res, next) {
+  const userId = req.headers['x-user-id'];
+  
+  if (!userId) {
+    return res.status(401).json({ error: '请先登录' });
+  }
+  
+  try {
+    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
+    stmt.bind([parseInt(userId)]);
+    let user = null;
+    if (stmt.step()) {
+      user = stmt.getAsObject();
+    }
+    stmt.free();
+    
+    if (!user) {
+      return res.status(401).json({ error: '用户不存在' });
+    }
+    
+    req.user = user;
+    next();
+  } catch(e) {
+    res.status(500).json({ error: '服务器错误' });
+  }
+}
+
+// 用户或管理员认证
+function verifyUserOrAdmin(req, res, next) {
+  // 先检查是否是管理员
+  const sessionId = req.headers['x-admin-session'];
+  if (sessionId) {
+    return verifyAdmin(req, res, function(adminNextReq) {
+      adminNextReq.isAdmin = true;
+      return next(adminNextReq);
+    });
+  }
+  
+  // 再检查是否是用户
+  return verifyUser(req, res, next);
 }
 
 function verifyAdmin(req, res, next) {
@@ -145,20 +207,20 @@ function verifyAdmin(req, res, next) {
 // 获取所有商品
 app.get('/api/products', (req, res) => {
   const { category, status } = req.query;
-  let sql = 'SELECT * FROM products WHERE 1=1';
+  let sql = 'SELECT p.*, u.student_id as publisher_student_id FROM products p LEFT JOIN users u ON p.user_id = u.id WHERE 1=1';
   let params = [];
   
   if (category && category !== 'all') {
-    sql += ' AND category = ?';
+    sql += ' AND p.category = ?';
     params.push(category);
   }
   
   if (status) {
-    sql += ' AND status = ?';
+    sql += ' AND p.status = ?';
     params.push(status);
   }
   
-  sql += ' ORDER BY created_at DESC';
+  sql += ' ORDER BY p.created_at DESC';
   
   const results = [];
   try {
@@ -175,9 +237,13 @@ app.get('/api/products', (req, res) => {
   res.json(results);
 });
 
-// 添加商品
+// 添加商品（需要登录）
 app.post('/api/products', (req, res) => {
-  const { title, description, category, price, images, contact } = req.body;
+  const { user_id, title, description, category, price, images, contact } = req.body;
+  
+  if (!user_id) {
+    return res.status(401).json({ error: '请先登录' });
+  }
   
   if (!title || !contact) {
     return res.status(400).json({ error: '请填写标题和联系方式' });
@@ -186,8 +252,8 @@ app.post('/api/products', (req, res) => {
   try {
     const imagesJson = JSON.stringify(images || []);
     db.run(
-      'INSERT INTO products (title, description, category, price, images, contact) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, description || '', category || '百货', price || 0, imagesJson, contact]
+      'INSERT INTO products (user_id, title, description, category, price, images, contact) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [user_id, title, description || '', category || '百货', price || 0, imagesJson, contact]
     );
     saveDB();
     res.json({ success: true });
@@ -197,8 +263,8 @@ app.post('/api/products', (req, res) => {
   }
 });
 
-// 更新商品状态
-app.put('/api/products/:id/status', (req, res) => {
+// 更新商品状态（仅创建者可操作，管理员除外）
+app.put('/api/products/:id/status', verifyUserOrAdmin, (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   
@@ -207,6 +273,31 @@ app.put('/api/products/:id/status', (req, res) => {
   }
   
   try {
+    // 检查是否是创建者或管理员
+    const stmt = db.prepare('SELECT user_id FROM products WHERE id = ?');
+    stmt.bind([id]);
+    let product = null;
+    if (stmt.step()) {
+      product = stmt.getAsObject();
+    }
+    stmt.free();
+    
+    if (!product) {
+      return res.status(404).json({ error: '商品不存在' });
+    }
+    
+    // 如果是管理员，允许修改
+    if (req.isAdmin) {
+      db.run('UPDATE products SET status = ? WHERE id = ?', [status, id]);
+      saveDB();
+      return res.json({ success: true });
+    }
+    
+    // 只有创建者可以修改
+    if (product.user_id !== req.user.id) {
+      return res.status(403).json({ error: '无权修改此商品' });
+    }
+    
     db.run('UPDATE products SET status = ? WHERE id = ?', [status, id]);
     saveDB();
     res.json({ success: true });
@@ -216,16 +307,131 @@ app.put('/api/products/:id/status', (req, res) => {
   }
 });
 
-// 删除商品
-app.delete('/api/products/:id', (req, res) => {
+// 更新商品（仅创建者或管理员）
+app.put('/api/products/:id', verifyUserOrAdmin, (req, res) => {
+  const { id } = req.params;
+  const { title, description, category, price, images, contact } = req.body;
+  
+  try {
+    const stmt = db.prepare('SELECT user_id FROM products WHERE id = ?');
+    stmt.bind([id]);
+    let product = null;
+    if (stmt.step()) {
+      product = stmt.getAsObject();
+    }
+    stmt.free();
+    
+    if (!product) {
+      return res.status(404).json({ error: '商品不存在' });
+    }
+    
+    if (!req.isAdmin && product.user_id !== req.user.id) {
+      return res.status(403).json({ error: '无权修改此商品' });
+    }
+    
+    const imagesJson = JSON.stringify(images || []);
+    db.run(
+      'UPDATE products SET title = ?, description = ?, category = ?, price = ?, images = ?, contact = ? WHERE id = ?',
+      [title, description || '', category || '百货', price || 0, imagesJson, contact, id]
+    );
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    console.error('更新商品失败:', e.message);
+    res.status(500).json({ error: '更新失败' });
+  }
+});
+
+// 删除商品（仅创建者或管理员）
+app.delete('/api/products/:id', verifyUserOrAdmin, (req, res) => {
   const { id } = req.params;
   
   try {
+    const stmt = db.prepare('SELECT user_id FROM products WHERE id = ?');
+    stmt.bind([id]);
+    let product = null;
+    if (stmt.step()) {
+      product = stmt.getAsObject();
+    }
+    stmt.free();
+    
+    if (!product) {
+      return res.status(404).json({ error: '商品不存在' });
+    }
+    
+    if (!req.isAdmin && product.user_id !== req.user.id) {
+      return res.status(403).json({ error: '无权删除此商品' });
+    }
+    
     db.run('DELETE FROM products WHERE id = ?', [id]);
     saveDB();
     res.json({ success: true });
   } catch(e) {
     console.error('删除商品失败:', e.message);
+    res.status(500).json({ error: '删除失败' });
+  }
+});
+
+// 获取我的商品（仅查看自己的）
+app.get('/api/my-products', verifyUser, (req, res) => {
+  const results = [];
+  try {
+    const stmt = db.prepare('SELECT * FROM products WHERE user_id = ? ORDER BY created_at DESC');
+    stmt.bind([req.user.id]);
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+  } catch(e) {
+    console.error('查询我的商品失败:', e.message);
+  }
+  res.json(results);
+});
+
+// ===== 广告位接口 =====
+// 获取所有广告
+app.get('/api/ads', (req, res) => {
+  const results = [];
+  try {
+    const stmt = db.prepare('SELECT * FROM ads WHERE status = ? ORDER BY sort_order DESC');
+    stmt.bind(['active']);
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+  } catch(e) {
+    console.error('查询广告失败:', e.message);
+  }
+  res.json(results);
+});
+
+// 添加广告（仅管理员）
+app.post('/api/admin/ads', verifyAdmin, (req, res) => {
+  const { title, description, image_url, link_url, sort_order } = req.body;
+  
+  try {
+    db.run(
+      'INSERT INTO ads (title, description, image_url, link_url, sort_order) VALUES (?, ?, ?, ?, ?)',
+      [title, description || '', image_url || '', link_url || '', sort_order || 0]
+    );
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    console.error('添加广告失败:', e.message);
+    res.status(500).json({ error: '添加失败' });
+  }
+});
+
+// 删除广告（仅管理员）
+app.delete('/api/admin/ads/:id', verifyAdmin, (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    db.run('DELETE FROM ads WHERE id = ?', [id]);
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    console.error('删除广告失败:', e.message);
     res.status(500).json({ error: '删除失败' });
   }
 });
