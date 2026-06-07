@@ -384,6 +384,7 @@
                 const products = await res.json();
                 renderProducts(products);
             } catch(e) {
+                console.error('加载商品失败:', e);
                 showToast('加载失败');
             }
         }
@@ -405,24 +406,25 @@
                 return `
                     <div class="item-card">
                         <div class="item-header">
-                            <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="display:flex;align-items:center;gap:12px;flex:1;">
                                 ${imageUrl ? `<img class="product-image-small" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image-small" style="display:flex;align-items:center;justify-content:center;font-size:24px;background:#e5e7eb;">📦</div>'}
-                                <div>
+                                <div style="flex:1;">
                                     <div class="item-title">${p.title}</div>
                                     <div class="item-meta">${p.category} · ¥${p.price || 0}</div>
+                                    <div class="item-meta" style="margin-top:4px;">${p.contact}</div>
                                 </div>
                             </div>
-                            <div class="item-actions">
-                                <span class="badge ${statusClass}">${statusText}</span>
-                                ${p.status === 'available' ? 
-                                    `<button class="btn btn-success btn-small" onclick="updateStatus(${p.id}, 'sold')">已售</button>` :
-                                    `<button class="btn btn-secondary btn-small" onclick="updateStatus(${p.id}, 'available')">在售</button>`
-                                }
-                                <button class="btn btn-danger btn-small" onclick="deleteProduct(${p.id})">删除</button>
-                            </div>
                         </div>
-                        ${p.description ? `<div class="item-meta" style="margin-top:6px;">${p.description}</div>` : ''}
-                        <div class="item-meta" style="margin-top:4px;">联系方式：${p.contact}</div>
+                        ${p.description ? `<div class="item-meta" style="margin:8px 0;">${p.description}</div>` : ''}
+                        <div style="display:flex;gap:8px;margin-top:8px;">
+                            <span class="badge ${statusClass}">${statusText}</span>
+                            <div style="flex:1;"></div>
+                            ${p.status === 'available' ? 
+                                `<button class="btn btn-success btn-small" onclick="updateStatus(${p.id}, 'sold')">已售出</button>` :
+                                `<button class="btn btn-secondary btn-small" onclick="updateStatus(${p.id}, 'available')">重新在售</button>`
+                            }
+                            <button class="btn btn-danger btn-small" onclick="deleteProduct(${p.id})">删除</button>
+                        </div>
                     </div>
                 `;
             }).join('');

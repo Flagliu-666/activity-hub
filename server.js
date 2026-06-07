@@ -64,6 +64,18 @@ async function initDB() {
   `);
   db.run('CREATE INDEX IF NOT EXISTS idx_admin_sessions_session ON admin_sessions(session_id)');
 
+  // 用户表（学号+密码登录）
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      student_id TEXT NOT NULL UNIQUE,
+      name TEXT DEFAULT '',
+      password TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id)');
+
   // 创建默认主管理员
   try {
     const defaultPassword = crypto.createHash('md5').update('admin123').digest('hex');
@@ -215,6 +227,74 @@ app.delete('/api/products/:id', (req, res) => {
   } catch(e) {
     console.error('删除商品失败:', e.message);
     res.status(500).json({ error: '删除失败' });
+  }
+});
+
+// ===== 用户接口（学号+密码登录）=====
+// 用户注册
+app.post('/api/user/register', (req, res) => {
+  const { student_id, name, password } = req.body;
+  
+  if (!student_id || !password) {
+    return res.status(400).json({ error: '请输入学号和密码' });
+  }
+  
+  if (password.length < 6) {
+    return res.status(400).json({ error: '密码至少需要 6 位' });
+  }
+  
+  const passwordHash = hashPassword(password);
+  
+  try {
+    db.run(
+      'INSERT INTO users (student_id, name, password) VALUES (?, ?, ?)',
+      [student_id, name || '', passwordHash]
+    );
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    if (e.message.includes('UNIQUE')) {
+      res.status(400).json({ error: '该学号已注册' });
+    } else {
+      res.status(500).json({ error: '注册失败' });
+    }
+  }
+});
+
+// 用户登录
+app.post('/api/user/login', (req, res) => {
+  const { student_id, password } = req.body;
+  
+  if (!student_id || !password) {
+    return res.status(400).json({ error: '请输入学号和密码' });
+  }
+  
+  const passwordHash = hashPassword(password);
+  
+  try {
+    const stmt = db.prepare('SELECT * FROM users WHERE student_id = ? AND password = ?');
+    stmt.bind([student_id, passwordHash]);
+    let user = null;
+    if (stmt.step()) {
+      user = stmt.getAsObject();
+    }
+    stmt.free();
+    
+    if (!user) {
+      return res.status(401).json({ error: '学号或密码错误' });
+    }
+    
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        student_id: user.student_id,
+        name: user.name
+      }
+    });
+  } catch(e) {
+    console.error('登录失败:', e);
+    res.status(500).json({ error: '服务器错误' });
   }
 });
 

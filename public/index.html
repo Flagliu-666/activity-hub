@@ -24,6 +24,31 @@
             align-items: center;
             justify-content: space-between;
         }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 6px 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+        }
         .header-title h1 { font-size: 20px; font-weight: 700; }
         .header-title p { font-size: 13px; opacity: 0.9; margin-top: 4px; }
         .admin-link {
@@ -373,6 +398,81 @@
             font-size: 16px;
             font-weight: 600;
             margin-top: 16px;
+            cursor: pointer;
+            border: none;
+        }
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-modal.show {
+            display: flex;
+        }
+        .login-box {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            animation: slideUp 0.3s ease;
+        }
+        .login-box h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .login-box p {
+            color: #999;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .login-box .form-group {
+            margin-bottom: 16px;
+        }
+        .login-box .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .login-box .form-input:focus {
+            border-color: #667eea;
+        }
+        .login-box .btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+        }
+        .login-switch {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #666;
+        }
+        .login-switch a {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-close-lg {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -383,7 +483,7 @@
                 <h1>🏪 二手闲置平台</h1>
                 <p>闲置物品，循环利用</p>
             </div>
-            <a href="/login.html" class="admin-link">管理</a>
+            <div id="userArea"></div>
         </div>
     </div>
 
@@ -460,6 +560,57 @@
         </div>
     </div>
 
+    <!-- 登录/注册弹窗 -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-box">
+            <div id="loginForm">
+                <h2>👋 欢迎回来</h2>
+                <p>使用学号登录二手闲置平台</p>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="loginStudentId" placeholder="学号">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="loginPassword" placeholder="密码">
+                </div>
+                <button class="btn btn-primary" onclick="handleLogin()">登录</button>
+                <div class="login-switch">
+                    还没有账号？<a onclick="showRegisterForm()">立即注册</a>
+                </div>
+            </div>
+            <div id="registerForm" style="display:none;">
+                <h2>📝 注册账号</h2>
+                <p>创建你的二手闲置平台账号</p>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="regStudentId" placeholder="学号">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="regName" placeholder="姓名（选填）">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="regPassword" placeholder="密码（至少6位）">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="regPasswordConfirm" placeholder="确认密码">
+                </div>
+                <button class="btn btn-primary" onclick="handleRegister()">注册</button>
+                <div class="login-switch">
+                    已有账号？<a onclick="showLoginForm()">立即登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微信二维码弹窗 -->
+    <div class="login-modal" id="contactModal" onclick="closeContactModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width:400px;margin:20px auto;">
+            <div class="modal-header">
+                <div class="modal-title">联系平台</div>
+                <button class="modal-close" onclick="closeContactModal()">×</button>
+            </div>
+            <div class="modal-body" id="contactContent"></div>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
         <a href="/" class="active">
             <span class="nav-icon">🏠</span> 首页
@@ -471,6 +622,143 @@
     <script>
         let currentCategory = 'all';
         let uploadedImages = [];
+        let currentUser = localStorage.getItem('current_user');
+
+        // 初始化用户显示
+        function updateUserArea() {
+            const userArea = document.getElementById('userArea');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                userArea.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">👤</div>
+                        <span>${user.student_id}</span>
+                    </div>
+                `;
+            } else {
+                userArea.innerHTML = `<button class="login-btn" onclick="openLoginModal()">登录/注册</button>`;
+            }
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('show');
+            showLoginForm();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('show');
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        async function handleLogin() {
+            const studentId = document.getElementById('loginStudentId').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!studentId || !password) {
+                showToast('⚠️ 请输入学号和密码');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/user/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: studentId, password })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('current_user', JSON.stringify(data.user));
+                    currentUser = JSON.stringify(data.user);
+                    showToast('✅ 登录成功');
+                    closeLoginModal();
+                    updateUserArea();
+                } else {
+                    showToast('⚠️ ' + (data.error || '登录失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        async function handleRegister() {
+            const studentId = document.getElementById('regStudentId').value.trim();
+            const name = document.getElementById('regName').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+            
+            if (!studentId || !password) {
+                showToast('⚠️ 请输入学号和密码');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showToast('⚠️ 密码至少需要 6 位');
+                return;
+            }
+            
+            if (password !== passwordConfirm) {
+                showToast('⚠️ 两次密码不一致');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/user/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: studentId, name, password })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 注册成功，请登录');
+                    showLoginForm();
+                    document.getElementById('loginStudentId').value = studentId;
+                    document.getElementById('regStudentId').value = '';
+                    document.getElementById('regName').value = '';
+                    document.getElementById('regPassword').value = '';
+                    document.getElementById('regPasswordConfirm').value = '';
+                } else {
+                    showToast('⚠️ ' + (data.error || '注册失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('current_user');
+                currentUser = null;
+                updateUserArea();
+                showToast('已退出登录');
+            }
+        }
+
+        function showContactQRCode(contact) {
+            const modal = document.getElementById('contactModal');
+            document.getElementById('contactContent').innerHTML = `
+                <div style="text-align:center;padding:20px;">
+                    <p style="margin-bottom:16px;color:#666;">扫码添加平台微信</p>
+                    <img src="/wechat-qrcode.png" alt="微信二维码" style="width:300px;height:300px;border-radius:12px;">
+                    <p style="margin-top:16px;font-size:18px;font-weight:600;color:#333;">${contact}</p>
+                </div>
+            `;
+            modal.classList.add('show');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('show');
+        }
 
         async function loadProducts() {
             try {
@@ -628,13 +916,13 @@
                         <h3 style="font-size:18px;color:#333;margin-bottom:12px;">${product.title}</h3>
                         ${product.description ? `<p style="color:#666;line-height:1.6;margin-bottom:16px;">${product.description}</p>` : ''}
                         <div style="background:#f9fafb;padding:12px;border-radius:8px;margin-bottom:16px;">
-                            <div style="font-size:13px;color:#999;margin-bottom:4px;">联系方式</div>
+                            <div style="font-size:13px;color:#999;margin-bottom:4px;">平台联系方式</div>
                             <div style="font-size:16px;color:#333;font-weight:600;">${product.contact}</div>
                         </div>
                         ${product.status === 'available' ? `
-                            <a href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(product.contact)}" target="_blank" class="contact-btn">
-                                联系卖家
-                            </a>
+                            <button class="contact-btn" onclick="showContactQRCode('${product.contact}')">
+                                联系平台（扫码加微信）
+                            </button>
                         ` : '<div style="text-align:center;color:#999;padding:16px;">该商品已售出</div>'}
                     </div>
                 `;
@@ -658,6 +946,7 @@
         }
 
         // 初始化
+        updateUserArea();
         loadProducts();
     </script>
 </body>
