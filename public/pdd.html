@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="format-detection" content="telephone=no">
-    <title>拼多多福袋互助</title>
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="活动互助站 - 拼多多福袋互助">
-    <meta property="og:description" content="拼多多福袋互助，一键复制邀请码，快速完成任务">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+    <title>PDD福袋互助</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -16,73 +11,44 @@
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%);
+        .header {
+            background: linear-gradient(135deg, #F97316, #F59E0B);
+            color: white;
+            padding: 20px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        .btn-primary:active {
-            background: linear-gradient(135deg, #EA580C 0%, #D97706 100%);
-        }
-        .code-item {
-            animation: fadeUp 0.25s ease-out;
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 入群横幅 */
-        .group-banner {
-            margin: 12px 16px; border-radius: 14px;
-            padding: 14px 18px;
-            display: flex; align-items: center;
+        .header-top {
+            display: flex;
+            align-items: center;
             justify-content: space-between;
-            cursor: pointer; position: relative; overflow: hidden;
-            transition: transform 0.2s;
         }
-        .group-banner:active { transform: scale(0.98); }
+        .back-btn {
+            font-size: 24px;
+            text-decoration: none;
+            color: white;
+        }
+        .header-title h1 { font-size: 18px; font-weight: 600; }
+        .header-title p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+        .badge { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-size: 12px; }
         .group-banner {
-            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            margin: 12px 16px; border-radius: 14px; padding: 14px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer;
+            background: linear-gradient(135deg, #1890ff, #096dd9);
             box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
         }
-        .banner-left {
-            display: flex; align-items: center; gap: 12px;
-            position: relative; flex: 1; min-width: 0;
-        }
+        .banner-left { display: flex; align-items: center; gap: 12px; flex: 1; }
         .banner-icon {
             width: 40px; height: 40px; border-radius: 50%;
             background: rgba(255,255,255,0.2);
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; font-size: 18px;
+            font-size: 18px;
         }
-        .banner-text .banner-title {
-            font-size: 15px; font-weight: 600; color: white;
-        }
-        .banner-text .banner-desc {
-            font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;
-        }
-        .banner-arrow {
-            color: white; font-size: 14px; position: relative; flex-shrink: 0; opacity: 0.9;
-        }
-
-        /* Tab 标签栏 */
-        .tab-btn {
-            padding: 8px 20px; border-radius: 20px;
-            font-size: 14px; font-weight: 500;
-            border: none; cursor: pointer;
-            transition: all 0.2s;
-            background: #f3f4f6; color: #6b7280;
-            white-space: nowrap;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #F97316, #F59E0B);
-            color: white;
-            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
-        }
-        .tab-btn .tab-count {
-            font-size: 11px; margin-left: 4px;
-        }
-
-        /* 提交表单区 */
+        .banner-text .banner-title { font-size: 15px; font-weight: 600; color: white; }
+        .banner-text .banner-desc { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+        .banner-arrow { color: white; font-size: 14px; }
         .submit-section {
             margin: 0 16px; padding: 16px;
             background: white; border-radius: 16px;
@@ -98,88 +64,77 @@
             outline: none;
             transition: border-color 0.2s;
         }
-        .submit-input:focus {
-            border-color: #F97316;
-        }
+        .submit-input:focus { border-color: #F97316; }
         .submit-btn {
             width: 100%; margin-top: 10px; padding: 12px;
             border: none; border-radius: 12px;
             font-size: 16px; font-weight: 600;
             color: white; cursor: pointer;
+            background: linear-gradient(135deg, #F97316, #F59E0B);
         }
-
-        /* 邀请码卡片 */
         .code-card {
-            display: flex; align-items: center;
-            gap: 12px; padding: 14px 16px;
-            margin: 0 16px 8px;
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; margin: 0 16px 8px;
             background: white; border-radius: 14px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
-        .code-card.used {
-            opacity: 0.55; background: #f9fafb;
-        }
+        .code-card.used { opacity: 0.55; background: #f9fafb; }
         .code-card .code-num {
             flex: 1; font-size: 18px;
             font-family: 'Courier New', monospace;
             font-weight: 700; letter-spacing: 0.12em;
             color: #1f2937; cursor: pointer;
-            user-select: all;
         }
-        .code-card.used .code-num {
-            text-decoration: line-through; color: #9ca3af;
-        }
-        .code-actions {
-            display: flex; gap: 8px; flex-shrink: 0;
-        }
+        .code-card.used .code-num { text-decoration: line-through; color: #9ca3af; }
+        .code-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .btn-copy, .btn-go {
             padding: 8px 14px; border: none;
             border-radius: 8px; font-size: 13px;
             font-weight: 600; cursor: pointer;
-            transition: all 0.15s;
         }
-        .btn-copy {
-            background: #f3f4f6; color: #374151;
-        }
-        .btn-copy:active { background: #e5e7eb; }
+        .btn-copy { background: #f3f4f6; color: #374151; }
         .btn-go {
             background: linear-gradient(135deg, #F97316, #F59E0B);
             color: white;
         }
-        .btn-go:active {
-            background: linear-gradient(135deg, #EA580C, #D97706);
-        }
-        .code-card.used .btn-go {
-            background: #d1d5db; color: #9ca3af;
-            cursor: not-allowed;
-        }
-        .time-label {
-            font-size: 11px; color: #9ca3af;
-            text-align: center; margin-top: -4px;
-            margin-bottom: 8px;
-        }
-
-        /* 底部导航 */
+        .code-card.used .btn-go { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+        .time-label { font-size: 11px; color: #9ca3af; text-align: center; margin-top: -4px; margin-bottom: 8px; }
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; display: flex;
             border-top: 1px solid #f3f4f6;
-            z-index: 50;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+            z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
         }
         .bottom-nav a {
             flex: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 8px 0 12px;
-            text-decoration: none; color: #9ca3af;
-            font-size: 11px; transition: color 0.2s;
+            padding: 8px 0 12px; text-decoration: none;
+            color: #9ca3af; font-size: 11px;
         }
         .bottom-nav a.active { color: #F97316; }
-        .bottom-nav a .nav-icon {
-            font-size: 20px; margin-bottom: 2px;
+        .bottom-nav .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000;
         }
-
-        /* Toast */
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white; border-radius: 20px;
+            padding: 28px 24px 20px; text-align: center;
+            max-width: 300px; width: 90%;
+        }
+        .modal-qr-placeholder {
+            width: 180px; height: 180px; border-radius: 12px;
+            margin: 0 auto 14px; overflow: hidden;
+        }
+        .modal-qr-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-close {
+            background: #f0f2f5; color: #6b7280;
+            padding: 10px 36px; border-radius: 20px;
+            font-size: 14px; cursor: pointer;
+        }
         .toast {
             position: fixed; top: 20px; left: 50%;
             transform: translateX(-50%);
@@ -190,76 +145,22 @@
             pointer-events: none; white-space: nowrap;
         }
         .toast.show { opacity: 1; }
-
-        /* 弹窗 */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: none; align-items: center; justify-content: center;
-            z-index: 1000;
-        }
-        .modal-overlay.show {
-            display: flex; animation: fadeIn 0.25s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-box {
-            background: white; border-radius: 20px;
-            padding: 28px 24px 20px; text-align: center;
-            max-width: 300px; width: 90%;
-            animation: modalPop 0.3s ease;
-        }
-        @keyframes modalPop {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .modal-box .modal-title {
-            font-size: 17px; font-weight: 700; margin-bottom: 16px;
-        }
-        .modal-box .modal-qr-placeholder {
-            width: 180px; height: 180px; border-radius: 12px;
-            margin: 0 auto 14px;
-            background: #f3f4f6;
-            display: flex; align-items: center; justify-content: center;
-            color: #9ca3af; font-size: 13px;
-            overflow: hidden;
-        }
-        .modal-box .modal-qr-placeholder img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .modal-box .modal-close {
-            background: #f0f2f5; color: #6b7280;
-            padding: 10px 36px; border-radius: 20px;
-            font-size: 14px; font-weight: 500;
-            cursor: pointer; display: inline-block;
-        }
-
-        /* 空状态 */
-        .empty-state {
-            text-align: center; padding: 40px 20px; color: #9ca3af;
-        }
-        .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #9ca3af; }
     </style>
 </head>
 <body>
-
-    <!-- ===== 顶部导航 ===== -->
-    <div class="bg-gradient-to-r from-orange-500 to-yellow-500 text-white p-4 sticky top-0 z-20">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <a href="/" class="text-2xl mr-3 no-underline text-white">←</a>
-                <div>
-                    <h1 class="text-lg font-bold">拼多多福袋互助</h1>
-                    <p class="text-xs opacity-80">百亿补贴 · 一键复制跳转助力</p>
-                </div>
+    <div class="header">
+        <div class="header-top">
+            <a href="/" class="back-btn">←</a>
+            <div class="header-title">
+                <h1>PDD福袋互助</h1>
+                <p>百亿补贴 · 一键复制跳转助力</p>
             </div>
-            <span class="text-sm bg-white/20 px-2 py-1 rounded" id="countBadge">-- 可用</span>
+            <span class="badge" id="countBadge">-- 可用</span>
         </div>
     </div>
 
-    <!-- ===== 入群横幅 ===== -->
-    <div class="group-banner" onclick="showModal('group')">
+    <div class="group-banner" onclick="showModal()">
         <div class="banner-left">
             <div class="banner-icon">👥</div>
             <div class="banner-text">
@@ -270,165 +171,114 @@
         <div class="banner-arrow">进群 ›</div>
     </div>
 
-    <!-- ===== 提交邀请码 ===== -->
-    <div class="py-2 px-4" id="submitForm">
-        <div class="submit-section">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="text-orange-500 font-bold text-sm">✏️ 提交你的邀请码</span>
-                <span class="text-xs text-gray-400">分享给其他人助力</span>
-            </div>
-            <input
-                type="text"
-                class="submit-input"
-                id="codeInput"
-                placeholder="请输入9位邀请码"
-                maxlength="9"
-                inputmode="numeric"
-                pattern="[0-9]*"
-                autocomplete="off"
-            >
-            <button class="submit-btn btn-primary" id="submitBtn" onclick="submitCode()">
-                提交邀请码
-            </button>
+    <div class="submit-section">
+        <div style="margin-bottom: 10px;">
+            <span style="color: #F97316; font-weight: 600; font-size: 14px;">✏️ 提交你的9位助力码</span>
+            <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">以9开头，分享给其他人助力</span>
         </div>
+        <input
+            type="text"
+            class="submit-input"
+            id="codeInput"
+            placeholder="请输入9位助力码（以9开头）"
+            maxlength="9"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            autocomplete="off"
+        >
+        <button class="submit-btn" id="submitBtn" onclick="submitCode()">
+            提交助力码
+        </button>
     </div>
 
-    <!-- ===== Tab 标签 ===== -->
-    <div class="flex gap-2 px-4 py-3 overflow-x-auto" style="scrollbar-width:none">
-        <button class="tab-btn active" id="tabAvailable" onclick="loadCodes('available')">
-            可用 <span class="tab-count" id="countAvailable">--</span>
-        </button>
-        <button class="tab-btn" id="tabUsed" onclick="loadCodes('used')">
-            已使用 <span class="tab-count" id="countUsed">--</span>
-        </button>
-        <button class="tab-btn" id="tabAll" onclick="loadCodes('all')">
-            全部
-        </button>
-    </div>
-
-    <!-- ===== 邀请码列表 ===== -->
     <div id="codeList" class="pb-20">
         <div class="empty-state">
-            <div class="empty-icon">📭</div>
+            <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
             <div>加载中...</div>
         </div>
     </div>
 
-    <!-- ===== 底部导航 ===== -->
     <nav class="bottom-nav">
-        <a href="/" class="nav-item">
+        <a href="/">
             <span class="nav-icon">🏠</span> 首页
         </a>
-        <a href="/pdd.html" class="nav-item active">
-            <span class="nav-icon">🎫</span> 大厅
+        <a href="/pdd.html" class="active">
+            <span class="nav-icon">🎁</span> PDD
         </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="document.getElementById('codeInput').focus(); document.getElementById('codeInput').scrollIntoView({behavior:'smooth'});">
+        <a href="/jd.html">
+            <span class="nav-icon">🛒</span> 京东
+        </a>
+        <a href="/hot.html">
+            <span class="nav-icon">🔥</span> 热门
+        </a>
+        <a href="javascript:void(0)" onclick="document.getElementById('codeInput').focus(); document.getElementById('codeInput').scrollIntoView({behavior:'smooth'});">
             <span class="nav-icon">✏️</span> 提交
         </a>
     </nav>
 
-    <!-- ===== 弹窗 ===== -->
-    <div class="modal-overlay" id="modalGroup" onclick="hideModal('group')">
+    <div class="modal-overlay" id="modalGroup" onclick="hideModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-title">👥 扫码加入交流群</div>
+            <div style="font-size: 17px; font-weight: 700; margin-bottom: 16px;">👥 扫码加入交流群</div>
             <div class="modal-qr-placeholder">
                 <img src="../images/group-qr.jpg" alt="交流群二维码">
             </div>
-            <div class="modal-close" onclick="hideModal('group')">关闭</div>
+            <div class="modal-close" onclick="hideModal()">关闭</div>
         </div>
     </div>
 
-    <!-- ===== Toast ===== -->
     <div class="toast" id="toast"></div>
 
     <script>
         let csrfToken = '';
-        let currentFilter = 'available';
 
-        // ===== 初始化 =====
         async function init() {
             try {
                 const r = await fetch('/api/csrf');
                 const d = await r.json();
                 csrfToken = d.token;
             } catch(e) {}
-
             await refreshStats();
-            loadCodes('available');
+            loadCodes();
         }
 
-        // ===== 刷新统计 =====
         async function refreshStats() {
             try {
                 const r = await fetch('/api/stats');
                 const d = await r.json();
-                document.getElementById('countBadge').textContent = d.available + ' 可用';
-                document.getElementById('countAvailable').textContent = d.available;
-                document.getElementById('countUsed').textContent = d.used;
+                document.getElementById('countBadge').textContent = d.pdd_available + ' 可用';
             } catch(e) {}
         }
 
-        // ===== 加载邀请码列表 =====
-        async function loadCodes(filter) {
-            currentFilter = filter;
-
-            // 更新 Tab 状态
-            ['Available', 'Used', 'All'].forEach(t => {
-                const tab = document.getElementById('tab' + t);
-                if (t.toLowerCase() === filter) {
-                    tab.classList.add('active');
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
-
-            let url = '/api/codes';
-            if (filter !== 'all') {
-                url += '?status=' + filter;
-            }
-
+        async function loadCodes() {
             try {
-                const r = await fetch(url);
+                const r = await fetch('/api/pdd/codes?status=available');
                 const codes = await r.json();
-                renderCodes(codes, filter);
+                renderCodes(codes);
             } catch(e) {
                 document.getElementById('codeList').innerHTML =
-                    '<div class="empty-state"><div class="empty-icon">❌</div><div>加载失败，请刷新重试</div></div>';
+                    '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">❌</div><div>加载失败</div></div>';
             }
         }
 
-        // ===== 渲染邀请码（显示前2位+*+后3位） =====
-        function renderCodes(codes, filter) {
+        function renderCodes(codes) {
             const container = document.getElementById('codeList');
-
             if (codes.length === 0) {
-                const msgs = {
-                    available: '暂无可用邀请码，快来提交一个吧！',
-                    used: '还没有被使用的邀请码',
-                    all: '暂无邀请码'
-                };
-                container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div>${msgs[filter] || '暂无数据'}</div></div>`;
+                container.innerHTML = '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📭</div><div>暂无助力码</div></div>';
                 return;
             }
-
             container.innerHTML = codes.map((c, i) => {
                 const isUsed = c.status === 'used';
-                // 隐藏中间数字：前2位 + *** + 后3位
                 const displayCode = c.code.length >= 5
                     ? c.code.substring(0, 2) + '***' + c.code.substring(c.code.length - 3)
                     : c.code;
-
                 const timeStr = isUsed
                     ? `<div class="time-label">已使用于 ${formatTime(c.used_at)}</div>`
                     : `<div class="time-label">提交于 ${formatTime(c.created_at)}</div>`;
-
                 return `
-                    <div class="code-card code-item ${isUsed ? 'used' : ''}" style="animation-delay:${i * 0.03}s">
+                    <div class="code-card" style="animation: fadeUp 0.25s ease-out ${i * 0.03}s">
                         <div class="code-num" onclick="copyCode('${c.code}', ${c.id})" title="点击复制">${displayCode}</div>
                         <div class="code-actions">
-                            <button class="btn-copy" onclick="copyCode('${c.code}', ${c.id})">
-                                📋 复制
-                            </button>
+                            <button class="btn-copy" onclick="copyCode('${c.code}', ${c.id})">📋 复制</button>
                             ${isUsed
                                 ? '<button class="btn-go" disabled>已使用</button>'
                                 : `<button class="btn-go" onclick="jumpToCode('${c.code}', ${c.id})">🚀 跳转</button>`
@@ -455,95 +305,56 @@
             return `${month}/${day} ${hour}:${min}`;
         }
 
-        // ===== 复制邀请码 =====
         function copyCode(code, codeId) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
+            if (navigator.clipboard) {
                 navigator.clipboard.writeText(code).then(() => {
                     showToast('✅ 已复制：' + code);
-                }).catch(() => fallbackCopy(code));
+                });
             } else {
-                fallbackCopy(code);
-            }
-        }
-
-        function fallbackCopy(code) {
-            const el = document.createElement('textarea');
-            el.value = code;
-            el.style.position = 'fixed';
-            el.style.left = '-9999px';
-            document.body.appendChild(el);
-            el.select();
-            try {
+                const el = document.createElement('textarea');
+                el.value = code;
+                document.body.appendChild(el);
+                el.select();
                 document.execCommand('copy');
+                document.body.removeChild(el);
                 showToast('✅ 已复制：' + code);
-            } catch(e) {
-                showToast('复制失败，请手动复制');
             }
-            document.body.removeChild(el);
         }
 
-        // ===== 跳转拼多多 =====
         function jumpToCode(code, codeId) {
-            // 先复制
-            if (navigator.clipboard && navigator.clipboard.writeText) {
+            if (navigator.clipboard) {
                 navigator.clipboard.writeText(code).catch(() => {});
-            } else {
-                fallbackCopySilent(code);
             }
-
-            // 标记为已使用
-            fetch(`/api/codes/${codeId}/use`, {
+            fetch(`/api/pdd/codes/${codeId}/use`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             }).catch(() => {});
-
             showToast('✅ 已复制，正在打开拼多多...');
-
-            // 尝试打开拼多多 APP
             setTimeout(() => {
                 window.location.href = 'pinduoduo://com.xunmeng.pinduoduo/search_result.html?search_key=' + code;
             }, 300);
-
-            // 刷新列表
             setTimeout(() => {
                 refreshStats();
-                loadCodes(currentFilter);
+                loadCodes();
             }, 1500);
         }
 
-        function fallbackCopySilent(code) {
-            const el = document.createElement('textarea');
-            el.value = code;
-            el.style.position = 'fixed';
-            el.style.left = '-9999px';
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-        }
-
-        // ===== 提交邀请码 =====
         async function submitCode() {
             const input = document.getElementById('codeInput');
             const code = input.value.trim();
-
             if (!code) {
-                showToast('⚠️ 请输入邀请码');
-                input.focus();
+                showToast('⚠️ 请输入助力码');
                 return;
             }
-            if (!/^\d{9}$/.test(code)) {
-                showToast('⚠️ 请输入9位数字邀请码');
-                input.focus();
+            if (!/^\d{9}$/.test(code) || !code.startsWith('9')) {
+                showToast('⚠️ 请输入9位数字助力码（以9开头）');
                 return;
             }
-
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
             btn.textContent = '提交中...';
-
             try {
-                const r = await fetch('/api/codes', {
+                const r = await fetch('/api/pdd/codes', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -552,65 +363,48 @@
                     body: JSON.stringify({ code })
                 });
                 const d = await r.json();
-
                 if (r.ok) {
                     showToast('✅ 提交成功！');
                     input.value = '';
                     csrfToken = d.token || csrfToken;
                     await refreshStats();
-                    loadCodes('available');
+                    loadCodes();
                 } else {
                     showToast('⚠️ ' + (d.error || '提交失败'));
-                    // 刷新 CSRF
-                    try {
-                        const cr = await fetch('/api/csrf');
-                        const cd = await cr.json();
-                        csrfToken = cd.token;
-                    } catch(e) {}
                 }
             } catch(e) {
-                showToast('⚠️ 网络错误，请重试');
+                showToast('⚠️ 网络错误');
             }
-
             btn.disabled = false;
-            btn.textContent = '提交邀请码';
+            btn.textContent = '提交助力码';
         }
 
-        // 回车提交
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function showModal() {
+            document.getElementById('modalGroup').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function hideModal() {
+            document.getElementById('modalGroup').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('codeInput').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') submitCode();
             });
         });
 
-        // ===== Toast =====
-        let toastTimer;
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        // ===== 弹窗 =====
-        function showModal(type) {
-            document.getElementById('modal' + (type === 'wechat' ? 'Wechat' : 'Group')).classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-        function hideModal(type) {
-            document.getElementById('modal' + (type === 'wechat' ? 'Wechat' : 'Group')).classList.remove('show');
-            document.body.style.overflow = '';
-        }
-
-        // ===== 定时刷新统计 =====
         setInterval(() => {
-            if (!document.hidden) {
-                refreshStats();
-            }
+            if (!document.hidden) refreshStats();
         }, 60000);
 
-        // ===== 启动 =====
         init();
     </script>
 </body>

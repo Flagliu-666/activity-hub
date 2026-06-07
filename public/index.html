@@ -3,71 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="format-detection" content="telephone=no">
     <title>活动互助站</title>
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="活动互助站">
-    <meta property="og:description" content="互助共赢，省心省力">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤝</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #6366f1;
-            --bg: #f0f2f5;
-            --card: #ffffff;
-            --text: #1a1a2e;
-            --text-secondary: #6b7280;
-        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
             min-height: 100vh;
             padding-bottom: 100px;
         }
-
-        /* ===== 头部 ===== */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 36px 20px 30px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
         }
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-            animation: headerPulse 8s ease-in-out infinite;
-        }
-        @keyframes headerPulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        .header .logo {
-            width: 56px; height: 56px;
-            border-radius: 50%;
+        .logo {
+            width: 56px; height: 56px; border-radius: 50%;
             background: rgba(255,255,255,0.2);
             margin: 0 auto 12px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            border: 2px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; border: 2px solid rgba(255,255,255,0.3);
         }
-        .header .title {
-            font-size: 24px; font-weight: 700;
-            margin-bottom: 6px; position: relative;
-        }
-        .header .slogan {
-            font-size: 14px; opacity: 0.9; position: relative;
-        }
-
-        /* ===== 统计卡片 ===== */
+        .title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+        .slogan { font-size: 14px; opacity: 0.9; }
         .stats {
             display: flex; gap: 10px;
             padding: 16px 16px 0;
@@ -75,64 +34,34 @@
             position: relative; z-index: 2;
         }
         .stat-card {
-            flex: 1; background: var(--card);
+            flex: 1; background: white;
             border-radius: 14px; padding: 14px 10px;
             text-align: center;
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
-        .stat-card .stat-num {
-            font-size: 22px; font-weight: 700; color: var(--primary);
-        }
-        .stat-card .stat-label {
-            font-size: 12px; color: var(--text-secondary); margin-top: 4px;
-        }
-
-        /* ===== 入群横幅 ===== */
+        .stat-num { font-size: 22px; font-weight: 700; color: #6366f1; }
+        .stat-label { font-size: 12px; color: #6b7280; margin-top: 4px; }
         .group-banner {
             margin: 12px 16px; border-radius: 14px;
             padding: 14px 18px;
             display: flex; align-items: center;
             justify-content: space-between;
-            cursor: pointer; position: relative; overflow: hidden;
-            transition: transform 0.2s;
-        }
-        .group-banner:active { transform: scale(0.98); }
-        .group-banner {
-            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            cursor: pointer;
+            background: linear-gradient(135deg, #1890ff, #096dd9);
             box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
         }
-        .group-banner::before {
-            content: '';
-            position: absolute; top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
-            animation: bannerGlow 4s ease-in-out infinite;
-        }
-        @keyframes bannerGlow {
-            0%, 100% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.15); opacity: 0.8; }
-        }
         .banner-left {
-            display: flex; align-items: center; gap: 12px;
-            position: relative; flex: 1; min-width: 0;
+            display: flex; align-items: center; gap: 12px; flex: 1;
         }
         .banner-icon {
             width: 40px; height: 40px; border-radius: 50%;
             background: rgba(255,255,255,0.2);
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; font-size: 18px;
+            font-size: 18px;
         }
-        .banner-text .banner-title {
-            font-size: 15px; font-weight: 600; color: white;
-        }
-        .banner-text .banner-desc {
-            font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;
-        }
-        .banner-arrow {
-            color: white; font-size: 14px; position: relative; flex-shrink: 0; opacity: 0.9;
-        }
-
-        /* ===== 热门活动区域 ===== */
+        .banner-text .banner-title { font-size: 15px; font-weight: 600; color: white; }
+        .banner-text .banner-desc { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+        .banner-arrow { color: white; font-size: 14px; }
         .section { padding: 20px 16px 10px; }
         .section-title {
             font-size: 17px; font-weight: 700;
@@ -142,108 +71,71 @@
         .hot-badge {
             display: inline-flex; align-items: center; gap: 4px;
             background: linear-gradient(135deg, #ff6b00, #ff8f00);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            color: white; padding: 4px 10px;
+            border-radius: 12px; font-size: 12px; font-weight: 600;
             animation: hotPulse 2s ease-in-out infinite;
         }
         @keyframes hotPulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
-
         .activity-card {
-            background: var(--card);
-            border-radius: 16px; padding: 16px;
+            background: white; border-radius: 16px; padding: 16px;
             margin-bottom: 10px;
             display: flex; align-items: center;
             text-decoration: none; color: inherit;
             box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
             gap: 14px;
         }
-        .activity-card:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
+        .activity-card:active { transform: scale(0.98); }
         .ac-icon {
             width: 48px; height: 48px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; flex-shrink: 0;
         }
         .ac-icon.orange { background: linear-gradient(135deg, #ff6b00, #ff8f00); }
-        .ac-icon.red    { background: linear-gradient(135deg, #ef4444, #f87171); }
-        .ac-icon.blue   { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
-        .ac-icon.green  { background: linear-gradient(135deg, #10b981, #34d399); }
-        .ac-info { flex: 1; min-width: 0; }
+        .ac-icon.red { background: linear-gradient(135deg, #e1251b, #ff6b6b); }
+        .ac-icon.blue { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .ac-info { flex: 1; }
         .ac-name { font-size: 15px; font-weight: 600; }
-        .ac-desc { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+        .ac-desc { font-size: 12px; color: #6b7280; margin-top: 3px; }
         .ac-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
-        .ac-arrow { color: #c0c0c0; font-size: 18px; flex-shrink: 0; }
-        .hot-tag {
-            display: inline-block; font-size: 10px;
-            background: #fef3c7; color: #d97706;
-            padding: 2px 6px; border-radius: 4px;
-            margin-left: 6px; vertical-align: middle;
+        .ac-arrow { color: #c0c0c0; font-size: 18px; }
+        .hot-activity-card {
+            background: white; border-radius: 16px; padding: 16px;
+            margin-bottom: 10px;
+            display: flex; align-items: center;
+            text-decoration: none; color: inherit;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+            transition: transform 0.2s;
+            gap: 14px;
         }
-
-        /* ===== 底部 ===== */
-        .footer {
-            text-align: center; padding: 30px 20px 40px; margin-top: 10px;
-        }
-        .footer-text {
-            font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;
-        }
-        .footer-copy {
-            font-size: 11px; color: #c0c0c0; margin-top: 12px;
-        }
-
-        /* ===== 二维码弹窗 ===== */
+        .hot-activity-card:active { transform: scale(0.98); }
+        .footer { text-align: center; padding: 30px 20px 40px; }
+        .footer-copy { font-size: 11px; color: #c0c0c0; }
         .modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.55);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
             display: none; align-items: center; justify-content: center;
             z-index: 1000;
         }
-        .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-overlay.show { display: flex; }
         .modal-box {
             background: white; border-radius: 20px;
             padding: 28px 24px 20px; text-align: center;
             max-width: 300px; width: 90%;
-            animation: modalPop 0.3s ease;
         }
-        @keyframes modalPop {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .modal-box .modal-title {
-            font-size: 17px; font-weight: 700; margin-bottom: 16px;
-        }
-        .modal-box .modal-qr-placeholder {
+        .modal-qr-placeholder {
             width: 180px; height: 180px; border-radius: 12px;
-            margin: 0 auto 14px;
-            background: #f3f4f6;
-            display: flex; align-items: center; justify-content: center;
-            color: #9ca3af; font-size: 13px;
-            overflow: hidden;
+            margin: 0 auto 14px; overflow: hidden;
         }
-        .modal-box .modal-qr-placeholder img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .modal-box .modal-close {
+        .modal-qr-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-close {
             background: #f0f2f5; color: #6b7280;
             padding: 10px 36px; border-radius: 20px;
-            font-size: 14px; font-weight: 500;
-            cursor: pointer; display: inline-block;
+            font-size: 14px; cursor: pointer;
         }
-        .modal-box .modal-close:active { background: #e5e7eb; }
-
-        /* ===== Toast ===== */
         .toast {
             position: fixed; top: 20px; left: 50%;
             transform: translateX(-50%);
@@ -257,32 +149,28 @@
     </style>
 </head>
 <body>
-
-    <!-- ===== 头部 ===== -->
     <header class="header">
         <div class="logo">🤝</div>
         <div class="title">活动互助站</div>
         <div class="slogan">互助共赢 · 省心省力 · 一起撸毛</div>
     </header>
 
-    <!-- ===== 统计卡片 ===== -->
     <div class="stats">
         <div class="stat-card">
-            <div class="stat-num" id="statActivity">4</div>
-            <div class="stat-label">进行中活动</div>
+            <div class="stat-num" id="statPdd">--</div>
+            <div class="stat-label">PDD助力码</div>
         </div>
         <div class="stat-card">
-            <div class="stat-num" id="statCodes">--</div>
-            <div class="stat-label">可用邀请码</div>
+            <div class="stat-num" id="statJd">--</div>
+            <div class="stat-label">京东链接</div>
         </div>
         <div class="stat-card">
             <div class="stat-num" id="statUsed">--</div>
-            <div class="stat-label">已助力人次</div>
+            <div class="stat-label">已助力</div>
         </div>
     </div>
 
-    <!-- ===== 入群横幅 ===== -->
-    <div class="group-banner" onclick="showModal('group')">
+    <div class="group-banner" onclick="showModal()">
         <div class="banner-left">
             <div class="banner-icon">👥</div>
             <div class="banner-text">
@@ -293,26 +181,35 @@
         <div class="banner-arrow">加入群聊 ›</div>
     </div>
 
-    <!-- ===== 今日热门活动 ===== -->
+    <!-- 今日热门活动 -->
     <section class="section">
         <div class="section-title">
             🔥 今日热门活动 <span class="hot-badge">🔥 HOT</span>
         </div>
+        <a href="/hot.html" class="activity-card">
+            <div class="ac-icon orange">📋</div>
+            <div class="ac-info">
+                <div class="ac-name">查看全部热门活动</div>
+                <div class="ac-desc">今日最新互助活动汇总</div>
+            </div>
+            <span class="ac-arrow">›</span>
+        </a>
+        <div id="hotList"></div>
+    </section>
+
+    <!-- 选择活动 -->
+    <section class="section">
+        <div class="section-title">🎯 选择活动</div>
 
         <a href="/pdd.html" class="activity-card">
             <div class="ac-icon orange">🎁</div>
             <div class="ac-info">
-                <div class="ac-name">PDD福袋互助 <span class="hot-tag">热门</span></div>
+                <div class="ac-name">PDD福袋互助</div>
                 <div class="ac-desc">拼多多福袋邀请码互助，一键复制跳转</div>
                 <div class="ac-meta">🔁 实时可用 · 点击进入</div>
             </div>
             <span class="ac-arrow">›</span>
         </a>
-    </section>
-
-    <!-- ===== 选择活动 ===== -->
-    <section class="section">
-        <div class="section-title">🎯 选择活动</div>
 
         <a href="/jd.html" class="activity-card">
             <div class="ac-icon red">🛒</div>
@@ -325,7 +222,7 @@
         </a>
 
         <a href="javascript:void(0)" class="activity-card" onclick="showToast('即将上线，敬请期待')">
-            <div class="ac-icon green">🍔</div>
+            <div class="ac-icon blue">🍔</div>
             <div class="ac-info">
                 <div class="ac-name">组队互助</div>
                 <div class="ac-desc">美团/饿了么等组队活动</div>
@@ -335,35 +232,31 @@
         </a>
     </section>
 
-    <!-- ===== 底部 ===== -->
     <footer class="footer">
         <div class="footer-copy">© 2026 活动互助站 · 互助让生活更美好</div>
     </footer>
 
-    <!-- ===== 弹窗 ===== -->
-    <div class="modal-overlay" id="modalGroup" onclick="hideModal('group')">
+    <div class="modal-overlay" id="modalGroup" onclick="hideModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-title">👥 扫码加入交流群</div>
+            <div style="font-size: 17px; font-weight: 700; margin-bottom: 16px;">👥 扫码加入交流群</div>
             <div class="modal-qr-placeholder">
                 <img src="images/group-qr.jpg" alt="交流群二维码">
             </div>
-            <div class="modal-close" onclick="hideModal('group')">关闭</div>
+            <div class="modal-close" onclick="hideModal()">关闭</div>
         </div>
     </div>
 
-    <!-- ===== Toast ===== -->
     <div class="toast" id="toast"></div>
 
     <script>
-        function showModal(type) {
-            document.getElementById('modal' + (type === 'wechat' ? 'Wechat' : 'Group')).classList.add('show');
+        function showModal() {
+            document.getElementById('modalGroup').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
-        function hideModal(type) {
-            document.getElementById('modal' + (type === 'wechat' ? 'Wechat' : 'Group')).classList.remove('show');
+        function hideModal() {
+            document.getElementById('modalGroup').classList.remove('show');
             document.body.style.overflow = '';
         }
-
         let toastTimer;
         function showToast(msg) {
             const toast = document.getElementById('toast');
@@ -377,13 +270,37 @@
         fetch('/api/stats')
             .then(r => r.json())
             .then(res => {
-                document.getElementById('statCodes').textContent = res.available;
-                document.getElementById('statUsed').textContent = res.used;
+                document.getElementById('statPdd').textContent = res.pdd_available;
+                document.getElementById('statJd').textContent = res.jd_available;
+                document.getElementById('statUsed').textContent = res.pdd_used + res.jd_used;
             })
             .catch(() => {
-                document.getElementById('statCodes').textContent = '--';
+                document.getElementById('statPdd').textContent = '--';
+                document.getElementById('statJd').textContent = '--';
                 document.getElementById('statUsed').textContent = '--';
             });
+
+        // 加载热门活动
+        fetch('/api/hot')
+            .then(r => r.json())
+            .then(activities => {
+                const container = document.getElementById('hotList');
+                if (activities.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+                container.innerHTML = activities.slice(0, 3).map(a => `
+                    <a href="${a.url}" class="hot-activity-card">
+                        <div style="font-size: 24px;">${a.icon || '🎯'}</div>
+                        <div class="ac-info">
+                            <div class="ac-name">${a.title}</div>
+                            <div class="ac-desc">${a.description || ''}</div>
+                        </div>
+                        <span class="ac-arrow">›</span>
+                    </a>
+                `).join('');
+            })
+            .catch(() => {});
     </script>
 </body>
 </html>

@@ -29,221 +29,121 @@
             text-decoration: none;
             color: white;
         }
-        .header-title h1 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .header-title p {
-            font-size: 12px;
-            opacity: 0.9;
-            margin-top: 4px;
-        }
-        .badge {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
+        .header-title h1 { font-size: 18px; font-weight: 600; }
+        .header-title p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+        .badge { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-size: 12px; }
         .group-banner {
-            margin: 12px 16px;
-            border-radius: 14px;
+            margin: 12px 16px; border-radius: 14px;
             padding: 14px 18px;
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
             justify-content: space-between;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
             background: linear-gradient(135deg, #1890ff, #096dd9);
             box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
         }
-        .banner-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-        }
+        .banner-left { display: flex; align-items: center; gap: 12px; flex: 1; }
         .banner-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 40px; height: 40px; border-radius: 50%;
             background: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 18px;
         }
-        .banner-text .banner-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: white;
-        }
-        .banner-text .banner-desc {
-            font-size: 12px;
-            color: rgba(255,255,255,0.85);
-            margin-top: 2px;
-        }
-        .banner-arrow {
-            color: white;
-            font-size: 14px;
-        }
+        .banner-text .banner-title { font-size: 15px; font-weight: 600; color: white; }
+        .banner-text .banner-desc { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+        .banner-arrow { color: white; font-size: 14px; }
         .submit-section {
-            margin: 0 16px;
-            padding: 16px;
-            background: white;
-            border-radius: 16px;
+            margin: 0 16px; padding: 16px;
+            background: white; border-radius: 16px;
             box-shadow: 0 2px 8px rgba(225,37,27,0.08);
         }
         .submit-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 14px;
-            outline: none;
+            width: 100%; padding: 12px 16px;
+            border: 2px solid #e5e7eb; border-radius: 12px;
+            font-size: 14px; outline: none;
             transition: border-color 0.2s;
         }
-        .submit-input:focus {
-            border-color: #e1251b;
-        }
+        .submit-input:focus { border-color: #e1251b; }
         .submit-btn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
+            width: 100%; margin-top: 10px; padding: 12px;
+            border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 600;
+            color: white; cursor: pointer;
             background: linear-gradient(135deg, #e1251b, #ff6b6b);
         }
-        .code-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            margin: 0 16px 8px;
-            background: white;
-            border-radius: 14px;
+        .link-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; margin: 0 16px 8px;
+            background: white; border-radius: 14px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
-        .code-card .link-text {
-            flex: 1;
-            font-size: 14px;
-            color: #1f2937;
-            word-break: break-all;
+        .link-card .link-text {
+            flex: 1; font-size: 14px;
+            color: #1f2937; word-break: break-all;
             cursor: pointer;
         }
-        .code-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
+        .code-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .btn-copy, .btn-go {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
+            padding: 8px 14px; border: none;
+            border-radius: 8px; font-size: 13px;
+            font-weight: 600; cursor: pointer;
         }
-        .btn-copy {
-            background: #f3f4f6;
-            color: #374151;
-        }
+        .btn-copy { background: #f3f4f6; color: #374151; }
         .btn-go {
             background: linear-gradient(135deg, #e1251b, #ff6b6b);
             color: white;
         }
+        .time-label {
+            font-size: 11px; color: #9ca3af;
+            text-align: center; margin-top: -4px;
+            margin-bottom: 8px;
+        }
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; display: flex;
             border-top: 1px solid #f3f4f6;
-            z-index: 50;
+            z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
         }
         .bottom-nav a {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 0 12px;
-            text-decoration: none;
-            color: #9ca3af;
-            font-size: 11px;
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 8px 0 12px; text-decoration: none;
+            color: #9ca3af; font-size: 11px;
         }
-        .bottom-nav a.active {
-            color: #e1251b;
-        }
-        .bottom-nav .nav-icon {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
+        .bottom-nav a.active { color: #e1251b; }
+        .bottom-nav .nav-icon { font-size: 20px; margin-bottom: 2px; }
         .modal-overlay {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: rgba(0,0,0,0.55);
-            display: none;
-            align-items: center;
-            justify-content: center;
+            display: none; align-items: center; justify-content: center;
             z-index: 1000;
         }
-        .modal-overlay.show {
-            display: flex;
-        }
+        .modal-overlay.show { display: flex; }
         .modal-box {
-            background: white;
-            border-radius: 20px;
-            padding: 28px 24px 20px;
-            text-align: center;
-            max-width: 300px;
-            width: 90%;
+            background: white; border-radius: 20px;
+            padding: 28px 24px 20px; text-align: center;
+            max-width: 300px; width: 90%;
         }
         .modal-qr-placeholder {
-            width: 180px;
-            height: 180px;
-            border-radius: 12px;
-            margin: 0 auto 14px;
-            overflow: hidden;
+            width: 180px; height: 180px; border-radius: 12px;
+            margin: 0 auto 14px; overflow: hidden;
         }
-        .modal-qr-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .modal-qr-placeholder img { width: 100%; height: 100%; object-fit: cover; }
         .modal-close {
-            background: #f0f2f5;
-            padding: 10px 36px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
+            background: #f0f2f5; color: #6b7280;
+            padding: 10px 36px; border-radius: 20px;
+            font-size: 14px; cursor: pointer;
         }
         .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
+            position: fixed; top: 20px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.82);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
+            background: rgba(0,0,0,0.82); color: white;
+            padding: 10px 20px; border-radius: 20px;
+            font-size: 14px; z-index: 2000;
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; white-space: nowrap;
         }
         .toast.show { opacity: 1; }
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #9ca3af;
-        }
+        .empty-state { text-align: center; padding: 40px 20px; color: #9ca3af; }
     </style>
 </head>
 <body>
@@ -272,13 +172,13 @@
     <div class="submit-section">
         <div style="margin-bottom: 10px;">
             <span style="color: #e1251b; font-weight: 600; font-size: 14px;">✏️ 提交京东活动链接</span>
-            <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">分享给其他人助力</span>
+            <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">支持 jd.com 链接或小程序链接</span>
         </div>
         <input
             type="text"
             class="submit-input"
             id="linkInput"
-            placeholder="粘贴京东链接（如 https://u.jd.com/xxx）"
+            placeholder="粘贴京东链接（如 https://u.jd.com/xxx 或 #小程序://...）"
             autocomplete="off"
         >
         <button class="submit-btn" id="submitBtn" onclick="submitLink()">
@@ -297,8 +197,14 @@
         <a href="/">
             <span class="nav-icon">🏠</span> 首页
         </a>
+        <a href="/pdd.html">
+            <span class="nav-icon">🎁</span> PDD
+        </a>
         <a href="/jd.html" class="active">
-            <span class="nav-icon">🎫</span> 大厅
+            <span class="nav-icon">🛒</span> 京东
+        </a>
+        <a href="/hot.html">
+            <span class="nav-icon">🔥</span> 热门
         </a>
         <a href="javascript:void(0)" onclick="document.getElementById('linkInput').focus(); document.getElementById('linkInput').scrollIntoView({behavior:'smooth'});">
             <span class="nav-icon">✏️</span> 提交
@@ -334,47 +240,70 @@
             try {
                 const r = await fetch('/api/stats');
                 const d = await r.json();
-                document.getElementById('countBadge').textContent = d.available + ' 可用';
+                document.getElementById('countBadge').textContent = d.jd_available + ' 可用';
             } catch(e) {}
         }
 
         async function loadLinks() {
             try {
-                const r = await fetch('/api/codes?status=available');
-                const codes = await r.json();
-                renderLinks(codes);
+                const r = await fetch('/api/jd/links?status=available');
+                const links = await r.json();
+                renderLinks(links);
             } catch(e) {
                 document.getElementById('linkList').innerHTML =
                     '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">❌</div><div>加载失败</div></div>';
             }
         }
 
-        function renderLinks(codes) {
+        function renderLinks(links) {
             const container = document.getElementById('linkList');
-            if (codes.length === 0) {
+            if (links.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📭</div><div>暂无链接</div></div>';
                 return;
             }
-            container.innerHTML = codes.map((c, i) => {
-                const displayUrl = c.code.length >= 5
-                    ? c.code.substring(0, 2) + '***' + c.code.substring(c.code.length - 3)
-                    : c.code;
+            container.innerHTML = links.map((c, i) => {
+                const isUsed = c.status === 'used';
+                const displayLink = c.link.length > 20
+                    ? c.link.substring(0, 10) + '...' + c.link.substring(c.link.length - 10)
+                    : c.link;
+                const timeStr = isUsed
+                    ? `<div class="time-label">已使用于 ${formatTime(c.used_at)}</div>`
+                    : `<div class="time-label">提交于 ${formatTime(c.created_at)}</div>`;
                 return `
-                    <div class="code-card" style="animation: fadeUp 0.25s ease-out ${i * 0.03}s">
-                        <div class="link-text" onclick="copyLink('${c.code}', ${c.id})" title="点击复制">${displayUrl}</div>
+                    <div class="link-card" style="animation: fadeUp 0.25s ease-out ${i * 0.03}s">
+                        <div class="link-text" onclick="copyLink('${c.link}', ${c.id})" title="点击复制">${displayLink}</div>
                         <div class="code-actions">
-                            <button class="btn-copy" onclick="copyLink('${c.code}', ${c.id})">📋 复制</button>
-                            <button class="btn-go" onclick="openLink('${c.code}', ${c.id})">🚀 跳转</button>
+                            <button class="btn-copy" onclick="copyLink('${c.link}', ${c.id})">📋 复制</button>
+                            ${isUsed
+                                ? '<button class="btn-go" disabled>已使用</button>'
+                                : `<button class="btn-go" onclick="openLink('${c.link}', ${c.id})">🚀 跳转</button>`
+                            }
                         </div>
                     </div>
+                    ${timeStr}
                 `;
             }).join('');
+        }
+
+        function formatTime(str) {
+            if (!str) return '--';
+            const d = new Date(str.replace(' ', 'T') + '+08:00');
+            const now = new Date();
+            const diff = Math.floor((now - d) / 1000);
+            if (diff < 60) return '刚刚';
+            if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+            if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+            const month = d.getMonth() + 1;
+            const day = d.getDate();
+            const hour = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            return `${month}/${day} ${hour}:${min}`;
         }
 
         function copyLink(link, id) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(link).then(() => {
-                    showToast('✅ 已复制：' + link);
+                    showToast('✅ 已复制');
                 });
             } else {
                 const el = document.createElement('textarea');
@@ -383,7 +312,7 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                showToast('✅ 已复制：' + link);
+                showToast('✅ 已复制');
             }
         }
 
@@ -391,7 +320,10 @@
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(link).catch(() => {});
             }
-            fetch(`/api/codes/${id}/use`, { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
+            fetch(`/api/jd/links/${id}/use`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).catch(() => {});
             showToast('✅ 已复制，正在打开京东...');
             setTimeout(() => {
                 window.location.href = link;
@@ -409,21 +341,23 @@
                 showToast('⚠️ 请输入链接');
                 return;
             }
-            if (!link.includes('jd.com') && !link.includes('u.jd.com')) {
-                showToast('⚠️ 请输入京东链接（包含 jd.com）');
+            const isJdLink = link.includes('jd.com') || link.includes('u.jd.com') ||
+                            link.includes('#小程序://') || link.includes('openapp.jdmoble');
+            if (!isJdLink) {
+                showToast('⚠️ 请输入京东链接（包含 jd.com 或小程序链接）');
                 return;
             }
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
             btn.textContent = '提交中...';
             try {
-                const r = await fetch('/api/codes', {
+                const r = await fetch('/api/jd/links', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-Token': csrfToken
                     },
-                    body: JSON.stringify({ code: link })
+                    body: JSON.stringify({ link })
                 });
                 const d = await r.json();
                 if (r.ok) {
