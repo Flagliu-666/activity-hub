@@ -80,6 +80,19 @@ async function initDB() {
   `);
   db.run('CREATE INDEX IF NOT EXISTS idx_admins_role ON admins(role)');
 
+  // 管理员会话表
+  db.run(`
+    CREATE TABLE IF NOT EXISTS admin_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT NOT NULL UNIQUE,
+      admin_id INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME NOT NULL,
+      FOREIGN KEY (admin_id) REFERENCES admins(id)
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_admin_sessions_session ON admin_sessions(session_id)');
+
   // 创建默认主管理员（用户名：admin，密码：admin123）
   try {
     const defaultPassword = crypto.createHash('md5').update('admin123').digest('hex');
@@ -205,16 +218,30 @@ function verifyAdmin(req, res, next) {
   }
   
   try {
-    const stmt = db.prepare('SELECT * FROM admins WHERE id = ?');
-    stmt.bind([sessionId]);
-    let admin = null;
-    if (stmt.step()) {
-      admin = stmt.getAsObject();
+    // 先从 admin_sessions 表查找 session_id 对应的 admin_id
+    const sessionStmt = db.prepare('SELECT admin_id FROM admin_sessions WHERE session_id = ? AND expires_at > datetime("now")');
+    sessionStmt.bind([sessionId]);
+    let session = null;
+    if (sessionStmt.step()) {
+      session = sessionStmt.getAsObject();
     }
-    stmt.free();
+    sessionStmt.free();
+    
+    if (!session) {
+      return res.status(401).json({ error: '登录已过期' });
+    }
+    
+    // 再用 admin_id 查询管理员信息
+    const adminStmt = db.prepare('SELECT * FROM admins WHERE id = ?');
+    adminStmt.bind([session.admin_id]);
+    let admin = null;
+    if (adminStmt.step()) {
+      admin = adminStmt.getAsObject();
+    }
+    adminStmt.free();
     
     if (!admin) {
-      return res.status(401).json({ error: '登录已过期' });
+      return res.status(401).json({ error: '管理员不存在' });
     }
     
     req.admin = admin;
@@ -396,10 +423,10 @@ app.post('/api/admin/login', (req, res) => {
     // 生成会话 ID
     const sessionId = crypto.randomBytes(32).toString('hex');
     
-    // 将会话存储到数据库
+    // 将会话存储到 admin_sessions 表
     db.run(
-      'INSERT INTO csrf_tokens (token, expires_at) VALUES (?, datetime("now", "+1 year"))',
-      [sessionId]
+      'INSERT INTO admin_sessions (session_id, admin_id, expires_at) VALUES (?, ?, datetime("now", "+1 year"))',
+      [sessionId, admin.id]
     );
     saveDB();
     
