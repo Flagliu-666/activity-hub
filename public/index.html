@@ -41,11 +41,19 @@
         .form-input, .form-textarea, .form-select { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; }
         .form-input:focus, .form-textarea:focus { border-color: #667eea; }
         .form-textarea { min-height: 100px; resize: vertical; }
-        .btn { padding: 12px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .btn { padding: 12px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
         .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; width: 100%; }
         .btn-danger { background: #ef4444; color: white; }
         .btn-success { background: #10b981; color: white; }
         .btn-secondary { background: #f3f4f6; color: #666; }
+        .login-btn { color: white; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; background: rgba(255,255,255,0.1); font-size: 13px; transition: transform 0.1s; }
+        .login-btn:active { transform: scale(0.95); }
+        .category-tab { flex: 1; padding: 14px 8px; border: none; background: none; font-size: 14px; font-weight: 500; color: #666; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; min-width: 70px; transition: transform 0.1s; }
+        .category-tab:active { transform: scale(0.95); }
+        .category-tab.active { color: #667eea; border-bottom-color: #667eea; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.1s; }
+        .product-card:active { transform: scale(0.98); }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; border-top: 1px solid #e5e7eb; z-index: 50; }
         .bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0 12px; text-decoration: none; color: #999; font-size: 11px; }
         .bottom-nav a.active { color: #667eea; }
@@ -137,9 +145,8 @@
         <div class="modal-content" style="max-width:500px;margin:20px auto;border-radius:20px;">
             <div class="modal-header"><div class="modal-title">联系平台</div><button class="modal-close" onclick="closePlatformModal()">×</button></div>
             <div class="modal-body" style="text-align:center;">
-                <p style="font-size:18px;font-weight:600;margin-bottom:20px;">有什么问题，添加客服微信</p>
-                <img src="/wechat-qrcode.png" alt="微信二维码" style="width:300px;height:300px;border-radius:12px;">
-                <p style="margin-top:16px;font-size:16px;color:#333;font-weight:600;">17533304569</p>
+                <p style="font-size:28px;font-weight:700;color:#333;margin-bottom:12px;">客服微信：</p>
+                <p style="font-size:32px;font-weight:700;color:#667eea;margin-bottom:20px;">17533304569</p>
             </div>
         </div>
     </div>
@@ -166,7 +173,7 @@
                 const res = await fetch('/api/user/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: studentId, password }) });
                 const data = await res.json();
                 if (data.success) { localStorage.setItem('current_user', JSON.stringify(data.user)); currentUser = JSON.stringify(data.user); showToast('✅ 登录成功'); closeLoginModal(); updateUserArea(); }
-                else showToast('⚠️ ' + (data.error || '登录失败'));
+                else { showToast('⚠️ 学号或密码错误'); }
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
         async function handleRegister() {
@@ -178,7 +185,7 @@
                 const res = await fetch('/api/user/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: studentId, name, password }) });
                 const data = await res.json();
                 if (data.success) { showToast('✅ 注册成功，请登录'); showLoginForm(); document.getElementById('loginStudentId').value = studentId; }
-                else showToast('⚠️ ' + (data.error || '注册失败'));
+                else { showToast('⚠️ ' + (data.error || '注册失败')); }
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
         function logout() { if (confirm('确定要退出登录吗？')) { localStorage.removeItem('current_user'); currentUser = null; updateUserArea(); showToast('已退出登录'); } }
@@ -192,6 +199,61 @@
             else if (tab === 'platform') { document.getElementById('platformModal').classList.add('show'); }
         }
         function closePlatformModal() { document.getElementById('platformModal').classList.remove('show'); }
+        function openPublishModal() { if (!currentUser) { openLoginModal(); return; } document.getElementById('publishModal').classList.add('show'); uploadedImages = []; document.getElementById('imagePreview').innerHTML = ''; }
+        function closePublishModal() { document.getElementById('publishModal').classList.remove('show'); }
+        function handleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (uploadedImages.length >= 3) { showToast('最多上传3张图片'); return; }
+                const reader = new FileReader();
+                reader.onload = function(e) { uploadedImages.push(e.target.result); renderImagePreview(); };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+        function renderImagePreview() { document.getElementById('imagePreview').innerHTML = uploadedImages.map((img, idx) => `<div style="width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;display:inline-block;margin:4px;"><img src="${img}" style="width:100%;height:100%;object-fit:cover;"><button onclick="removeImage(${idx})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;">×</button></div>`).join(''); }
+        function removeImage(index) { uploadedImages.splice(index, 1); renderImagePreview(); }
+        async function publishProduct() {
+            const title = document.getElementById('productTitle').value.trim(), category = document.getElementById('productCategory').value, price = parseFloat(document.getElementById('productPrice').value) || 0, desc = document.getElementById('productDesc').value.trim(), contact = document.getElementById('productContact').value.trim();
+            if (!title || !contact) { showToast('⚠️ 请填写标题和联系方式'); return; }
+            try {
+                const res = await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ user_id: JSON.parse(currentUser).id, title, category, price, description: desc, images: uploadedImages, contact }) });
+                const data = await res.json();
+                if (data.success) { showToast('✅ 发布成功'); closePublishModal(); document.getElementById('productTitle').value = ''; document.getElementById('productPrice').value = ''; document.getElementById('productDesc').value = ''; document.getElementById('productContact').value = ''; loadProducts(); }
+                else showToast('⚠️ ' + (data.error || '发布失败'));
+            } catch(e) { showToast('⚠️ 网络错误'); }
+        }
+        async function loadProducts() {
+            try {
+                const params = currentCategory === 'all' ? '' : `?category=${currentCategory}`;
+                const res = await fetch('/api/products' + params);
+                const products = await res.json();
+                renderProducts(products);
+            } catch(e) { showToast('加载失败'); }
+        }
+        function renderProducts(products) {
+            const container = document.getElementById('productGrid');
+            if (products.length === 0) { container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>暂无商品</p></div>'; return; }
+            container.innerHTML = products.map(p => {
+                const images = JSON.parse(p.images || '[]'), imageUrl = images[0] || '', statusClass = p.status === 'available' ? 'status-available' : 'status-sold', statusText = p.status === 'available' ? '在售' : '已售';
+                return `<div class="product-card" onclick="showDetail(${p.id})">${imageUrl ? `<img class="product-image" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image" style="display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>'}<div class="product-info"><div class="product-category">${p.category}</div><div class="product-title">${p.title}</div><div class="product-price">${p.price || 0}</div><span class="product-status ${statusClass}">${statusText}</span></div></div>`;
+            }).join('');
+        }
+        function filterByCategory(category) { currentCategory = category; document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active')); event.target.classList.add('active'); loadProducts(); }
+        async function showDetail(id) {
+            try {
+                const res = await fetch('/api/products');
+                const products = await res.json(), product = products.find(p => p.id === id);
+                if (!product) return;
+                const images = JSON.parse(product.images || '[]'), statusClass = product.status === 'available' ? 'status-available' : 'status-sold', statusText = product.status === 'available' ? '在售' : '已售';
+                let html = `<div style="margin-bottom:16px;">`;
+                if (images.length > 0) html += `<img style="width:100%;max-height:400px;object-fit:contain;border-radius:8px;" src="${images[0]}" alt="${product.title}">`;
+                html += `<div style="padding:16px;"><div style="font-size:28px;font-weight:700;color:#ef4444;margin-bottom:12px;">¥${product.price || 0}</div><div style="margin-bottom:12px;"><span class="product-category">${product.category}</span> <span class="product-status ${statusClass}">${statusText}</span></div><h3 style="font-size:18px;color:#333;margin-bottom:12px;">${product.title}</h3>${product.description ? `<p style="color:#666;line-height:1.6;margin-bottom:16px;">${product.description}</p>` : ''}<div style="background:#f9fafb;padding:12px;border-radius:8px;"><div style="font-size:13px;color:#999;margin-bottom:4px;">平台联系方式</div><div style="font-size:16px;color:#333;font-weight:600;">${product.contact}</div></div></div></div>`;
+                document.getElementById('detailContent').innerHTML = html;
+                document.getElementById('detailModal').classList.add('show');
+            } catch(e) { showToast('加载失败'); }
+        }
+        function closeDetailModal() { document.getElementById('detailModal').classList.remove('show'); }
         async function loadMyProducts() {
             if (!currentUser) return;
             try {
