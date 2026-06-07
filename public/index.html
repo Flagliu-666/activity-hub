@@ -13,13 +13,16 @@
         .header-title p { font-size: 13px; opacity: 0.9; margin-top: 4px; }
         .admin-link { color: white; text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; }
         .user-info { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-        .login-btn { color: white; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; background: rgba(255,255,255,0.1); font-size: 13px; }
+        .login-btn { color: white; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; background: rgba(255,255,255,0.1); font-size: 13px; transition: transform 0.1s; }
+        .login-btn:active { transform: scale(0.95); }
         .category-tabs { display: flex; background: white; border-bottom: 1px solid #e5e7eb; overflow-x: auto; position: sticky; top: 68px; z-index: 9; }
-        .category-tab { flex: 1; padding: 14px 8px; border: none; background: none; font-size: 14px; font-weight: 500; color: #666; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; min-width: 70px; }
+        .category-tab { flex: 1; padding: 14px 8px; border: none; background: none; font-size: 14px; font-weight: 500; color: #666; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; min-width: 70px; transition: transform 0.1s; }
+        .category-tab:active { transform: scale(0.95); }
         .category-tab.active { color: #667eea; border-bottom-color: #667eea; }
         .content { padding: 16px; }
         .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.1s; }
+        .product-card:active { transform: scale(0.98); }
         .product-image { width: 100%; height: 160px; object-fit: cover; background: #f0f0f0; }
         .product-info { padding: 12px; }
         .product-category { display: inline-block; padding: 3px 8px; background: #f0f0f0; border-radius: 4px; font-size: 11px; color: #666; margin-bottom: 6px; }
@@ -47,13 +50,6 @@
         .btn-danger { background: #ef4444; color: white; }
         .btn-success { background: #10b981; color: white; }
         .btn-secondary { background: #f3f4f6; color: #666; }
-        .login-btn { color: white; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; background: rgba(255,255,255,0.1); font-size: 13px; transition: transform 0.1s; }
-        .login-btn:active { transform: scale(0.95); }
-        .category-tab { flex: 1; padding: 14px 8px; border: none; background: none; font-size: 14px; font-weight: 500; color: #666; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; min-width: 70px; transition: transform 0.1s; }
-        .category-tab:active { transform: scale(0.95); }
-        .category-tab.active { color: #667eea; border-bottom-color: #667eea; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.1s; }
-        .product-card:active { transform: scale(0.98); }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; border-top: 1px solid #e5e7eb; z-index: 50; }
         .bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0 12px; text-decoration: none; color: #999; font-size: 11px; }
         .bottom-nav a.active { color: #667eea; }
@@ -66,10 +62,11 @@
         .login-box p { color: #999; margin-bottom: 24px; font-size: 14px; }
         .login-switch { text-align: center; margin-top: 16px; font-size: 14px; color: #666; }
         .login-switch a { color: #667eea; text-decoration: none; cursor: pointer; }
-        .ad-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .ad-image { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+        .ad-strip { background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.06); transition: opacity 0.15s; }
+        .ad-strip:active { opacity: 0.8; }
+        .ad-strip-line1 { font-size: 13px; color: #92400e; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ad-strip-line2 { font-size: 11px; color: #b45309; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .empty-state { text-align: center; padding: 60px 20px; color: #999; }
-        .my-product-actions { display: flex; gap: 8px; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -129,7 +126,6 @@
                 <div class="form-group"><label class="form-label">分类</label><select class="form-select" id="productCategory"><option value="百货">百货</option><option value="书本">书本</option><option value="美妆">美妆</option><option value="衣服">衣服</option><option value="虚拟商品">虚拟商品</option></select></div>
                 <div class="form-group"><label class="form-label">价格（元）</label><input type="number" class="form-input" id="productPrice" placeholder="0.00" step="0.01" min="0"></div>
                 <div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="productDesc" placeholder="商品描述"></textarea></div>
-                <div class="form-group"><label class="form-label">图片（最多3张）</label><input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="handleImageUpload(event)"><div class="image-preview" id="imagePreview"></div></div>
                 <div class="form-group"><label class="form-label">联系方式 *</label><input type="text" class="form-input" id="productContact" placeholder="微信/手机号"></div>
                 <button class="btn btn-primary" onclick="publishProduct()">发布商品</button>
             </div>
@@ -152,7 +148,7 @@
     </div>
     <div class="toast" id="toast"></div>
     <script>
-        let currentCategory = 'all', currentUser = localStorage.getItem('current_user'), uploadedImages = [], currentTab = 'home';
+        let currentCategory = 'all', currentUser = localStorage.getItem('current_user'), currentTab = 'home';
         function updateUserArea() {
             const userArea = document.getElementById('userArea');
             if (currentUser) {
@@ -199,27 +195,15 @@
             else if (tab === 'platform') { document.getElementById('platformModal').classList.add('show'); }
         }
         function closePlatformModal() { document.getElementById('platformModal').classList.remove('show'); }
-        function openPublishModal() { if (!currentUser) { openLoginModal(); return; } document.getElementById('publishModal').classList.add('show'); uploadedImages = []; document.getElementById('imagePreview').innerHTML = ''; }
+        function openPublishModal() { if (!currentUser) { openLoginModal(); return; } document.getElementById('publishModal').classList.add('show'); }
         function closePublishModal() { document.getElementById('publishModal').classList.remove('show'); }
-        function handleImageUpload(event) {
-            const files = Array.from(event.target.files);
-            files.forEach(file => {
-                if (uploadedImages.length >= 3) { showToast('最多上传3张图片'); return; }
-                const reader = new FileReader();
-                reader.onload = function(e) { uploadedImages.push(e.target.result); renderImagePreview(); };
-                reader.readAsDataURL(file);
-            });
-            event.target.value = '';
-        }
-        function renderImagePreview() { document.getElementById('imagePreview').innerHTML = uploadedImages.map((img, idx) => `<div style="width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;display:inline-block;margin:4px;"><img src="${img}" style="width:100%;height:100%;object-fit:cover;"><button onclick="removeImage(${idx})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;">×</button></div>`).join(''); }
-        function removeImage(index) { uploadedImages.splice(index, 1); renderImagePreview(); }
         async function publishProduct() {
             const title = document.getElementById('productTitle').value.trim(), category = document.getElementById('productCategory').value, price = parseFloat(document.getElementById('productPrice').value) || 0, desc = document.getElementById('productDesc').value.trim(), contact = document.getElementById('productContact').value.trim();
             if (!title || !contact) { showToast('⚠️ 请填写标题和联系方式'); return; }
             try {
-                const res = await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ user_id: JSON.parse(currentUser).id, title, category, price, description: desc, images: uploadedImages, contact }) });
+                const res = await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ user_id: JSON.parse(currentUser).id, title, category, price, description: desc, images: [], contact }) });
                 const data = await res.json();
-                if (data.success) { showToast('✅ 发布成功'); closePublishModal(); document.getElementById('productTitle').value = ''; document.getElementById('productPrice').value = ''; document.getElementById('productDesc').value = ''; document.getElementById('productContact').value = ''; loadProducts(); }
+                if (data.success) { showToast('✅ 发布成功'); closePublishModal(); document.getElementById('productTitle').value = ''; document.getElementById('productPrice').value = ''; document.getElementById('productDesc').value = ''; document.getElementById('productContact').value = ''; if (currentTab === 'my') loadMyProducts(); else loadProducts(); }
                 else showToast('⚠️ ' + (data.error || '发布失败'));
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
@@ -317,7 +301,11 @@
         function renderAds(ads) {
             const container = document.getElementById('adContainer');
             if (ads.length === 0) { container.innerHTML = ''; return; }
-            container.innerHTML = ads.map(ad => `<div class="ad-card">${ad.image_url ? `<img class="ad-image" src="${ad.image_url}" alt="${ad.title}">` : ''}<h3 style="font-size:16px;font-weight:600;margin-bottom:6px;">${ad.title}</h3>${ad.description ? `<p style="color:#666;font-size:14px;">${ad.description}</p>` : ''}</div>`).join('');
+            container.innerHTML = ads.map(ad => {
+                const linkHtml = ad.link_url ? `<a href="${ad.link_url}" target="_blank" style="text-decoration:none;color:inherit;" onclick="event.stopPropagation();">` : '';
+                const linkClose = ad.link_url ? `</a>` : '';
+                return `<div class="ad-strip" ${ad.link_url ? `onclick="window.open('${ad.link_url}','_blank')"` : ''}><div class="ad-strip-line1">${ad.title}${ad.description ? ' · ' + ad.description : ''}</div><div class="ad-strip-line2">${ad.link_url || ''}</div></div>`;
+            }).join('');
         }
         function showToast(msg) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
         updateUserArea(); loadProducts(); loadAds();

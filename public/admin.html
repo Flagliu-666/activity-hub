@@ -74,7 +74,7 @@
                 <div class="card-title">添加广告</div>
                 <div class="form-group"><label class="form-label">标题 *</label><input type="text" class="form-input" id="adTitle" placeholder="广告标题"></div>
                 <div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="adDesc" placeholder="广告描述"></textarea></div>
-                <div class="form-group"><label class="form-label">图片链接</label><input type="text" class="form-input" id="adImage" placeholder="https://..."></div>
+                <div class="form-group"><label class="form-label">链接地址</label><input type="text" class="form-input" id="adLink" placeholder="https://..."></div>
                 <div class="form-group"><label class="form-label">排序（数字越大越靠前）</label><input type="number" class="form-input" id="adSort" value="0"></div>
                 <button class="btn btn-primary" onclick="addAd()" style="width:100%;">添加广告</button>
             </div>
@@ -166,15 +166,15 @@
         function renderAds(ads) {
             const container = document.getElementById('adList');
             if (ads.length === 0) { container.innerHTML = '<div class="empty-state">暂无广告</div>'; return; }
-            container.innerHTML = ads.map(ad => `<div class="item-card"><div class="item-header"><div><div class="item-title">${ad.title}</div><div style="font-size:12px;color:#999;">${ad.description || ''}</div></div><button class="btn btn-danger btn-small" onclick="deleteAd(${ad.id})">删除</button></div></div>`).join('');
+            container.innerHTML = ads.map(ad => `<div class="item-card"><div class="item-header"><div><div class="item-title">${ad.title}</div><div style="font-size:12px;color:#999;">${ad.description || ''}</div>${ad.link_url ? `<div style="font-size:11px;color:#667eea;">🔗 ${ad.link_url}</div>` : ''}</div><button class="btn btn-danger btn-small" onclick="deleteAd(${ad.id})">删除</button></div></div>`).join('');
         }
         async function addAd() {
-            const title = document.getElementById('adTitle').value.trim(), desc = document.getElementById('adDesc').value.trim(), image_url = document.getElementById('adImage').value.trim(), sort_order = parseInt(document.getElementById('adSort').value) || 0;
+            const title = document.getElementById('adTitle').value.trim(), desc = document.getElementById('adDesc').value.trim(), link_url = document.getElementById('adLink').value.trim(), sort_order = parseInt(document.getElementById('adSort').value) || 0;
             if (!title) { showToast('⚠️ 请填写广告标题'); return; }
             try {
-                const res = await fetch('/api/admin/ads', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Session': adminSession }, body: JSON.stringify({ title, description: desc, image_url, link_url: '', sort_order }) });
+                const res = await fetch('/api/admin/ads', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Session': adminSession }, body: JSON.stringify({ title, description: desc, image_url: '', link_url, sort_order }) });
                 const data = await res.json();
-                if (data.success) { showToast('✅ 添加成功'); document.getElementById('adTitle').value = ''; document.getElementById('adDesc').value = ''; document.getElementById('adImage').value = ''; loadAds(); }
+                if (data.success) { showToast('✅ 添加成功'); document.getElementById('adTitle').value = ''; document.getElementById('adDesc').value = ''; document.getElementById('adLink').value = ''; loadAds(); }
                 else showToast('⚠️ ' + (data.error || '添加失败'));
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
