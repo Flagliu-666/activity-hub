@@ -1,13 +1,14 @@
 {
-  "name": "activity-hub",
+  "name": "second-hand-platform",
   "version": "1.0.0",
-  "description": "活动互助站 - 拼多多福袋互助平台",
+  "description": "二手闲置平台",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "sql.js": "^1.10.3"
+    "sql.js": "^1.10.3",
+    "qrcode": "^1.5.3"
   }
 }

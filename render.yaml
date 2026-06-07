@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: activity-hub
+    name: second-hand-platform
     env: node
     region: frankfurt
     plan: starter

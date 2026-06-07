@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>管理后台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 二手闲置平台</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -18,14 +18,6 @@
             position: sticky;
             top: 0;
             z-index: 10;
-        }
-        .debug-info {
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 11px;
-            font-family: monospace;
         }
         .header-top {
             display: flex;
@@ -68,12 +60,8 @@
         .content {
             padding: 16px;
         }
-        .section {
-            display: none;
-        }
-        .section.active {
-            display: block;
-        }
+        .section { display: none; }
+        .section.active { display: block; }
         .card {
             background: white;
             border-radius: 12px;
@@ -87,9 +75,7 @@
             color: #333;
             margin-bottom: 12px;
         }
-        .form-group {
-            margin-bottom: 12px;
-        }
+        .form-group { margin-bottom: 12px; }
         .form-label {
             display: block;
             font-size: 13px;
@@ -118,9 +104,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s;
         }
-        .btn:active { transform: scale(0.98); }
         .btn-primary {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
@@ -129,13 +113,15 @@
             background: #ef4444;
             color: white;
         }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
         .btn-secondary {
             background: #f3f4f6;
             color: #666;
         }
-        .item-list {
-            margin-top: 16px;
-        }
+        .item-list { margin-top: 16px; }
         .item-card {
             background: #f9fafb;
             border-radius: 8px;
@@ -217,8 +203,14 @@
             font-size: 11px;
             font-weight: 600;
         }
-        .badge-master { background: #fef3c7; color: #92400e; }
-        .badge-sub { background: #dbeafe; color: #1e40af; }
+        .badge-available { background: #dcfce7; color: #166534; }
+        .badge-sold { background: #fee2e2; color: #991b1b; }
+        .product-image-small {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
@@ -230,86 +222,51 @@
             </div>
             <button class="logout-btn" onclick="logout()">退出登录</button>
         </div>
-        <div class="debug-info" id="debugInfo" style="display:none;">
-            调试信息已开启
-        </div>
-        <div style="padding: 10px 16px; background: #fff3cd; text-align: center;" id="testBtnContainer" class="debug-info">
-            <button onclick="loadHotActivities()" style="background: #856404; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
-                🔄 手动加载测试
-            </button>
-        </div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('hot')">🔥 热门活动</button>
-        <button class="tab-btn" onclick="switchTab('pdd')">🎁 PDD</button>
-        <button class="tab-btn" onclick="switchTab('jd')">🛒 京东</button>
+        <button class="tab-btn active" onclick="switchTab('products')">📦 商品管理</button>
         <button class="tab-btn" onclick="switchTab('admins')">👥 管理员</button>
     </div>
 
     <div class="content">
-        <!-- 热门活动 -->
-        <div id="tab-hot" class="section active">
+        <!-- 商品管理 -->
+        <div id="tab-products" class="section active">
             <div class="card">
-                <div class="card-title">添加热门活动</div>
+                <div class="card-title">添加商品</div>
                 <div class="form-group">
                     <label class="form-label">标题 *</label>
-                    <input type="text" class="form-input" id="hotTitle" placeholder="输入活动标题">
+                    <input type="text" class="form-input" id="productTitle" placeholder="商品标题">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">链接 *</label>
-                    <input type="text" class="form-input" id="hotUrl" placeholder="https://...">
+                    <label class="form-label">分类</label>
+                    <select class="form-select" id="productCategory">
+                        <option value="百货">百货</option>
+                        <option value="书本">书本</option>
+                        <option value="美妆">美妆</option>
+                        <option value="衣服">衣服</option>
+                        <option value="虚拟商品">虚拟商品</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">图标（emoji）</label>
-                    <input type="text" class="form-input" id="hotIcon" placeholder="🎯" value="🎯">
+                    <label class="form-label">价格（元）</label>
+                    <input type="number" class="form-input" id="productPrice" placeholder="0.00" step="0.01" min="0">
                 </div>
                 <div class="form-group">
                     <label class="form-label">描述</label>
-                    <textarea class="form-textarea" id="hotDesc" placeholder="活动描述"></textarea>
+                    <textarea class="form-textarea" id="productDesc" placeholder="商品描述"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">排序（数字越大越靠前）</label>
-                    <input type="number" class="form-input" id="hotSort" value="0">
+                    <label class="form-label">联系方式 *</label>
+                    <input type="text" class="form-input" id="productContact" placeholder="微信/手机号">
                 </div>
-                <button class="btn btn-primary" onclick="addHotActivity()" style="width: 100%;">添加活动</button>
+                <button class="btn btn-primary" onclick="addProduct()" style="width: 100%;">添加商品</button>
             </div>
-            <div class="item-list" id="hotList"></div>
-        </div>
-
-        <!-- PDD -->
-        <div id="tab-pdd" class="section">
-            <div class="card">
-                <div class="card-title">添加助力码</div>
-                <div class="form-group">
-                    <label class="form-label">9位助力码（以9开头）</label>
-                    <input type="text" class="form-input" id="pddCode" placeholder="9XXXXXXXX" maxlength="9" pattern="[0-9]*">
-                </div>
-                <button class="btn btn-primary" onclick="addPddCode()" style="width: 100%;">添加助力码</button>
-            </div>
-            <div class="item-list" id="pddList"></div>
-        </div>
-
-        <!-- 京东 -->
-        <div id="tab-jd" class="section">
-            <div class="card">
-                <div class="card-title">添加京东链接</div>
-                <div class="form-group">
-                    <label class="form-label">链接</label>
-                    <input type="text" class="form-input" id="jdLink" placeholder="https://u.jd.com/... 或小程序链接">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">标题（可选）</label>
-                    <input type="text" class="form-input" id="jdTitle" placeholder="链接标题">
-                </div>
-                <button class="btn btn-primary" onclick="addJdLink()" style="width: 100%;">添加链接</button>
-            </div>
-            <div class="item-list" id="jdList"></div>
+            <div class="item-list" id="productList"></div>
         </div>
 
         <!-- 管理员 -->
         <div id="tab-admins" class="section">
-            <!-- 修改密码 -->
             <div class="card" id="changePasswordCard">
                 <div class="card-title">🔑 修改密码</div>
                 <div class="form-group">
@@ -326,8 +283,6 @@
                 </div>
                 <button class="btn btn-primary" onclick="changePassword()" style="width: 100%;">修改密码</button>
             </div>
-            
-            <!-- 添加管理员（仅主管理员） -->
             <div class="card" id="addAdminCard">
                 <div class="card-title">添加管理员</div>
                 <div class="form-group">
@@ -341,8 +296,8 @@
                 <div class="form-group">
                     <label class="form-label">角色</label>
                     <select class="form-select" id="adminRole">
-                        <option value="sub_admin">副管理员（只能修改内容）</option>
                         <option value="admin">管理员（可以管理所有内容）</option>
+                        <option value="sub_admin">副管理员（只能修改内容）</option>
                     </select>
                 </div>
                 <button class="btn btn-primary" onclick="addAdmin()" style="width: 100%;">添加管理员</button>
@@ -370,35 +325,25 @@
         let adminRole = localStorage.getItem('admin_role');
         let adminUsername = localStorage.getItem('admin_username');
 
-        // 检查登录状态
         if (!adminSession) {
-            console.log('❌ 没有会话 ID，重定向到登录页');
             window.location.href = '/login.html';
-        } else {
-            console.log('✅ 找到会话 ID:', adminSession.substring(0, 10) + '...');
         }
 
         async function checkAuth() {
-            console.log('🔍 开始验证管理员权限...');
             try {
                 const res = await fetch('/api/admin/info', {
                     headers: { 'X-Admin-Session': adminSession }
                 });
                 
-                console.log('📡 验证响应状态:', res.status);
-                
                 if (!res.ok) {
-                    console.log('❌ 验证失败，状态码:', res.status);
                     localStorage.clear();
                     window.location.href = '/login.html';
                     return false;
                 }
                 
                 const data = await res.json();
-                console.log('✅ 验证成功:', data);
                 return true;
             } catch(e) {
-                console.error('❌ 验证异常:', e);
                 localStorage.clear();
                 window.location.href = '/login.html';
                 return false;
@@ -419,9 +364,7 @@
             event.target.classList.add('active');
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            if (tabName === 'hot') loadHotActivities();
-            if (tabName === 'pdd') loadPddCodes();
-            if (tabName === 'jd') loadJdLinks();
+            if (tabName === 'products') loadProducts();
             if (tabName === 'admins') {
                 if (adminRole === 'master') loadAdmins();
             }
@@ -434,247 +377,87 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // 热门活动
-        async function loadHotActivities() {
-            console.log('🔄 开始加载热门活动...');
+        // 商品管理
+        async function loadProducts() {
             try {
-                const res = await fetch('/api/hot');
-                console.log('📡 响应状态:', res.status);
-                
-                const activities = await res.json();
-                console.log('📦 活动数据:', activities);
-                
-                const container = document.getElementById('hotList');
-                console.log('🔍 容器元素:', container);
-                
-                if (!container) {
-                    console.error('❌ hotList 元素不存在！');
-                    showToast('❌ 页面元素错误');
-                    return;
-                }
-                
-                if (activities.length === 0) {
-                    container.innerHTML = '<div class="empty-state">暂无活动</div>';
-                    console.log('✅ 加载完成（空）');
-                    return;
-                }
-                
-                container.innerHTML = activities.map(a => `
-                    <div class="item-card">
-                        <div class="item-header">
-                            <div class="item-title">${a.icon} ${a.title}</div>
-                            <div class="item-actions">
-                                <button class="btn btn-danger btn-small" onclick="deleteHotActivity(${a.id})">删除</button>
-                            </div>
-                        </div>
-                        <div class="item-meta">${a.description || '无描述'}</div>
-                    </div>
-                `).join('');
-                
-                console.log('✅ 加载完成，共', activities.length, '个活动');
-                showToast('✅ 加载成功');
-            } catch(e) {
-                console.error('❌ 加载失败:', e);
-                showToast('❌ 加载失败: ' + e.message);
-            }
-        }
-
-        async function addHotActivity() {
-            const title = document.getElementById('hotTitle').value.trim();
-            const url = document.getElementById('hotUrl').value.trim();
-            const icon = document.getElementById('hotIcon').value.trim() || '🎯';
-            const desc = document.getElementById('hotDesc').value.trim();
-            const sort = parseInt(document.getElementById('hotSort').value) || 0;
-            
-            if (!title || !url) {
-                showToast('⚠️ 请填写标题和链接');
-                return;
-            }
-            
-            try {
-                const res = await fetch('/api/admin/hot', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Session': adminSession
-                    },
-                    body: JSON.stringify({ title, url, icon, description: desc, sort_order: sort })
-                });
-                
-                const data = await res.json();
-                if (data.success) {
-                    showToast('✅ 添加成功');
-                    document.getElementById('hotTitle').value = '';
-                    document.getElementById('hotUrl').value = '';
-                    document.getElementById('hotDesc').value = '';
-                    loadHotActivities();
-                } else {
-                    showToast('⚠️ ' + (data.error || '添加失败'));
-                }
-            } catch(e) {
-                showToast('⚠️ 网络错误');
-            }
-        }
-
-        async function deleteHotActivity(id) {
-            if (!confirm('确定要删除这个活动吗？')) return;
-            
-            try {
-                const res = await fetch(`/api/admin/hot/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'X-Admin-Session': adminSession }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('✅ 删除成功');
-                    loadHotActivities();
-                } else {
-                    showToast('⚠️ 删除失败');
-                }
-            } catch(e) {
-                showToast('⚠️ 网络错误');
-            }
-        }
-
-        // PDD
-        async function loadPddCodes() {
-            try {
-                const res = await fetch('/api/pdd/codes?status=available');
-                const codes = await res.json();
-                const container = document.getElementById('pddList');
-                
-                if (codes.length === 0) {
-                    container.innerHTML = '<div class="empty-state">暂无助力码</div>';
-                    return;
-                }
-                
-                container.innerHTML = codes.map(c => `
-                    <div class="item-card">
-                        <div class="item-header">
-                            <div class="item-title" style="font-family: monospace; font-size: 16px;">${c.code}</div>
-                            <div class="item-actions">
-                                <button class="btn btn-danger btn-small" onclick="deletePddCode(${c.id})">删除</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                const res = await fetch('/api/products');
+                const products = await res.json();
+                renderProducts(products);
             } catch(e) {
                 showToast('加载失败');
             }
         }
 
-        async function addPddCode() {
-            const code = document.getElementById('pddCode').value.trim();
+        function renderProducts(products) {
+            const container = document.getElementById('productList');
             
-            if (!code || !/^\d{9}$/.test(code) || !code.startsWith('9')) {
-                showToast('⚠️ 请输入9位数字助力码（以9开头）');
+            if (products.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无商品</div>';
                 return;
             }
             
-            try {
-                const res = await fetch('/api/admin/pdd', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Session': adminSession
-                    },
-                    body: JSON.stringify({ code })
-                });
+            container.innerHTML = products.map(p => {
+                const images = JSON.parse(p.images || '[]');
+                const imageUrl = images[0] || '';
+                const statusClass = p.status === 'available' ? 'badge-available' : 'badge-sold';
+                const statusText = p.status === 'available' ? '在售' : '已售';
                 
-                const data = await res.json();
-                if (data.success) {
-                    showToast('✅ 添加成功');
-                    document.getElementById('pddCode').value = '';
-                    loadPddCodes();
-                } else {
-                    showToast('⚠️ ' + (data.error || '添加失败'));
-                }
-            } catch(e) {
-                showToast('⚠️ 网络错误');
-            }
-        }
-
-        async function deletePddCode(id) {
-            if (!confirm('确定要删除这个助力码吗？')) return;
-            
-            try {
-                const res = await fetch(`/api/admin/pdd/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'X-Admin-Session': adminSession }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('✅ 删除成功');
-                    loadPddCodes();
-                } else {
-                    showToast('⚠️ 删除失败');
-                }
-            } catch(e) {
-                showToast('⚠️ 网络错误');
-            }
-        }
-
-        // 京东
-        async function loadJdLinks() {
-            try {
-                const res = await fetch('/api/jd/links?status=available');
-                const links = await res.json();
-                const container = document.getElementById('jdList');
-                
-                if (links.length === 0) {
-                    container.innerHTML = '<div class="empty-state">暂无链接</div>';
-                    return;
-                }
-                
-                container.innerHTML = links.map(c => `
+                return `
                     <div class="item-card">
                         <div class="item-header">
-                            <div class="item-title" style="font-size: 12px; word-break: break-all;">${c.link}</div>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                ${imageUrl ? `<img class="product-image-small" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image-small" style="display:flex;align-items:center;justify-content:center;font-size:24px;background:#e5e7eb;">📦</div>'}
+                                <div>
+                                    <div class="item-title">${p.title}</div>
+                                    <div class="item-meta">${p.category} · ¥${p.price || 0}</div>
+                                </div>
+                            </div>
                             <div class="item-actions">
-                                <button class="btn btn-danger btn-small" onclick="deleteJdLink(${c.id})">删除</button>
+                                <span class="badge ${statusClass}">${statusText}</span>
+                                ${p.status === 'available' ? 
+                                    `<button class="btn btn-success btn-small" onclick="updateStatus(${p.id}, 'sold')">已售</button>` :
+                                    `<button class="btn btn-secondary btn-small" onclick="updateStatus(${p.id}, 'available')">在售</button>`
+                                }
+                                <button class="btn btn-danger btn-small" onclick="deleteProduct(${p.id})">删除</button>
                             </div>
                         </div>
-                        ${c.title ? `<div class="item-meta">${c.title}</div>` : ''}
+                        ${p.description ? `<div class="item-meta" style="margin-top:6px;">${p.description}</div>` : ''}
+                        <div class="item-meta" style="margin-top:4px;">联系方式：${p.contact}</div>
                     </div>
-                `).join('');
-            } catch(e) {
-                showToast('加载失败');
-            }
+                `;
+            }).join('');
         }
 
-        async function addJdLink() {
-            const link = document.getElementById('jdLink').value.trim();
-            const title = document.getElementById('jdTitle').value.trim();
+        async function addProduct() {
+            const title = document.getElementById('productTitle').value.trim();
+            const category = document.getElementById('productCategory').value;
+            const price = parseFloat(document.getElementById('productPrice').value) || 0;
+            const desc = document.getElementById('productDesc').value.trim();
+            const contact = document.getElementById('productContact').value.trim();
             
-            if (!link) {
-                showToast('⚠️ 请输入链接');
-                return;
-            }
-            
-            const isJdLink = link.includes('jd.com') || link.includes('u.jd.com') || 
-                           link.includes('#小程序://') || link.includes('openapp.jdmoble');
-            
-            if (!isJdLink) {
-                showToast('⚠️ 请输入京东链接');
+            if (!title || !contact) {
+                showToast('⚠️ 请填写标题和联系方式');
                 return;
             }
             
             try {
-                const res = await fetch('/api/admin/jd', {
+                const res = await fetch('/api/products', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Admin-Session': adminSession
                     },
-                    body: JSON.stringify({ link, title })
+                    body: JSON.stringify({ title, category, price, description: desc, contact })
                 });
                 
                 const data = await res.json();
                 if (data.success) {
                     showToast('✅ 添加成功');
-                    document.getElementById('jdLink').value = '';
-                    document.getElementById('jdTitle').value = '';
-                    loadJdLinks();
+                    document.getElementById('productTitle').value = '';
+                    document.getElementById('productPrice').value = '';
+                    document.getElementById('productDesc').value = '';
+                    document.getElementById('productContact').value = '';
+                    loadProducts();
                 } else {
                     showToast('⚠️ ' + (data.error || '添加失败'));
                 }
@@ -683,18 +466,40 @@
             }
         }
 
-        async function deleteJdLink(id) {
-            if (!confirm('确定要删除这个链接吗？')) return;
+        async function updateStatus(id, status) {
+            try {
+                const res = await fetch(`/api/products/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Session': adminSession
+                    },
+                    body: JSON.stringify({ status })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ 状态已更新');
+                    loadProducts();
+                } else {
+                    showToast('⚠️ 更新失败');
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('确定要删除这个商品吗？')) return;
             
             try {
-                const res = await fetch(`/api/admin/jd/${id}`, {
+                const res = await fetch(`/api/products/${id}`, {
                     method: 'DELETE',
                     headers: { 'X-Admin-Session': adminSession }
                 });
                 const data = await res.json();
                 if (data.success) {
                     showToast('✅ 删除成功');
-                    loadJdLinks();
+                    loadProducts();
                 } else {
                     showToast('⚠️ 删除失败');
                 }
@@ -703,7 +508,7 @@
             }
         }
 
-        // 管理员管理（仅主管理员）
+        // 管理员管理
         async function loadAdmins() {
             try {
                 const res = await fetch('/api/admins', {
@@ -713,16 +518,15 @@
                 const container = document.getElementById('adminList');
                 
                 container.innerHTML = admins.map(a => {
-                    const badgeClass = a.role === 'master' ? 'badge-master' : 'badge-sub';
-                    const roleText = a.role === 'master' ? '主管理员' : '副管理员';
-                    const canDelete = a.role !== 'master'; // 不能删除主管理员
+                    const roleText = a.role === 'master' ? '主管理员' : (a.role === 'admin' ? '管理员' : '副管理员');
+                    const canDelete = a.role !== 'master';
                     
                     return `
                         <div class="item-card">
                             <div class="item-header">
                                 <div>
                                     <div class="item-title">${a.username}</div>
-                                    <span class="badge ${badgeClass}">${roleText}</span>
+                                    <div class="item-meta">${roleText}</div>
                                 </div>
                                 ${canDelete ? `<button class="btn btn-danger btn-small" onclick="deleteAdmin(${a.id})">删除</button>` : ''}
                             </div>
@@ -793,7 +597,6 @@
             }
         }
 
-        // 修改密码
         async function changePassword() {
             const currentPassword = document.getElementById('currentPassword').value;
             const newPassword = document.getElementById('newPassword').value;
@@ -845,37 +648,17 @@
         let isAuthChecked = false;
         
         async function init() {
-            // 显示调试信息
-            const debugInfo = document.getElementById('debugInfo');
-            debugInfo.style.display = 'block';
-            debugInfo.innerHTML = `📝 会话: ${adminSession ? adminSession.substring(0, 20) + '...' : '无'}<br>
-                                   👤 用户: ${adminUsername || '无'}<br>
-                                   🎭 角色: ${adminRole || '无'}`;
-            
-            // 先验证权限
             const authSuccess = await checkAuth();
             
             if (!authSuccess) {
-                debugInfo.innerHTML += '<br>❌ 权限验证失败';
-                debugInfo.style.color = '#ff6b6b';
-                return; // 验证失败，不再继续
+                return;
             }
             
             isAuthChecked = true;
-            debugInfo.innerHTML += '<br>✅ 权限验证通过';
-            debugInfo.style.color = '#51cf66';
-            
-            // 验证通过后才显示内容
-            document.getElementById('adminInfo').textContent = `${adminUsername} (${adminRole === 'master' ? '主管理员' : '副管理员'})`;
-            loadHotActivities();
+            document.getElementById('adminInfo').textContent = `${adminUsername} (${adminRole === 'master' ? '主管理员' : (adminRole === 'admin' ? '管理员' : '副管理员')})`;
+            loadProducts();
         }
 
-        // 页面加载后立即开始验证
-        console.log('🚀 管理后台页面加载');
-        console.log('📝 会话 ID:', adminSession ? adminSession.substring(0, 20) + '...' : '无');
-        console.log('👤 用户名:', adminUsername);
-        console.log('🎭 角色:', adminRole);
-        
         init();
     </script>
 </body>
