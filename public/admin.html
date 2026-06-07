@@ -105,15 +105,15 @@
     <div class="toast" id="toast"></div>
     <script>
         let adminSession = localStorage.getItem('admin_session'), adminRole = localStorage.getItem('admin_role'), adminUsername = localStorage.getItem('admin_username');
-        if (!adminSession) window.location.href = '/login.html';
+        if (!adminSession) window.location.href = '/admin-login.html';
         async function checkAuth() {
             try {
                 const res = await fetch('/api/admin/info', { headers: { 'X-Admin-Session': adminSession } });
-                if (!res.ok) { localStorage.clear(); window.location.href = '/login.html'; return false; }
+                if (!res.ok) { localStorage.clear(); window.location.href = '/admin-login.html'; return false; }
                 return true;
-            } catch(e) { localStorage.clear(); window.location.href = '/login.html'; return false; }
+            } catch(e) { localStorage.clear(); window.location.href = '/admin-login.html'; return false; }
         }
-        function logout() { if (confirm('确定要退出登录吗？')) { localStorage.clear(); window.location.href = '/login.html'; } }
+        function logout() { if (confirm('确定要退出登录吗？')) { localStorage.clear(); window.location.href = '/admin-login.html'; } }
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
