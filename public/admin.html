@@ -233,6 +233,11 @@
         <div class="debug-info" id="debugInfo" style="display:none;">
             调试信息已开启
         </div>
+        <div style="padding: 10px 16px; background: #fff3cd; text-align: center;" id="testBtnContainer" class="debug-info">
+            <button onclick="loadHotActivities()" style="background: #856404; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                🔄 手动加载测试
+            </button>
+        </div>
     </div>
 
     <div class="tabs">
@@ -412,13 +417,26 @@
 
         // 热门活动
         async function loadHotActivities() {
+            console.log('🔄 开始加载热门活动...');
             try {
                 const res = await fetch('/api/hot');
+                console.log('📡 响应状态:', res.status);
+                
                 const activities = await res.json();
+                console.log('📦 活动数据:', activities);
+                
                 const container = document.getElementById('hotList');
+                console.log('🔍 容器元素:', container);
+                
+                if (!container) {
+                    console.error('❌ hotList 元素不存在！');
+                    showToast('❌ 页面元素错误');
+                    return;
+                }
                 
                 if (activities.length === 0) {
                     container.innerHTML = '<div class="empty-state">暂无活动</div>';
+                    console.log('✅ 加载完成（空）');
                     return;
                 }
                 
@@ -433,8 +451,12 @@
                         <div class="item-meta">${a.description || '无描述'}</div>
                     </div>
                 `).join('');
+                
+                console.log('✅ 加载完成，共', activities.length, '个活动');
+                showToast('✅ 加载成功');
             } catch(e) {
-                showToast('加载失败');
+                console.error('❌ 加载失败:', e);
+                showToast('❌ 加载失败: ' + e.message);
             }
         }
 
