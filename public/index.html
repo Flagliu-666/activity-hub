@@ -245,15 +245,52 @@
                 const res = await fetch('/api/products');
                 const products = await res.json(), product = products.find(p => p.id === id);
                 if (!product) return;
-                const images = JSON.parse(product.images || '[]'), statusClass = product.status === 'available' ? 'status-available' : 'status-sold', statusText = product.status === 'available' ? '在售' : '已售';
-                let html = `<div style="margin-bottom:16px;">`;
-                if (images.length > 0) html += `<img style="width:100%;max-height:400px;object-fit:contain;border-radius:8px;" src="${images[0]}" alt="${product.title}">`;
-                html += `<div style="padding:16px;"><div style="font-size:28px;font-weight:700;color:#ef4444;margin-bottom:12px;">¥${product.price || 0}</div><div style="margin-bottom:12px;"><span class="product-category">${product.category}</span> <span class="product-status ${statusClass}">${statusText}</span></div><h3 style="font-size:18px;color:#333;margin-bottom:12px;">${product.title}</h3>${product.description ? `<p style="color:#666;line-height:1.6;margin-bottom:16px;">${product.description}</p>` : ''}<div style="background:#f9fafb;padding:12px;border-radius:8px;"><div style="font-size:13px;color:#999;margin-bottom:4px;">平台联系方式</div><div style="font-size:16px;color:#333;font-weight:600;">${product.contact}</div></div></div></div>`;
-                document.getElementById('detailContent').innerHTML = html;
-                document.getElementById('detailModal').classList.add('show');
+                renderProductDetail(product, false);
             } catch(e) { showToast('加载失败'); }
         }
+        async function showMyProductDetail(id) {
+            if (!currentUser) return;
+            try {
+                const res = await fetch('/api/my-products', { headers: { 'X-User-Id': JSON.parse(currentUser).id } });
+                const products = await res.json(), product = products.find(p => p.id === id);
+                if (!product) { showToast('商品不存在或不属于你'); return; }
+                renderProductDetail(product, true);
+            } catch(e) { showToast('加载失败'); }
+        }
+        function renderProductDetail(product, isOwner) {
+            const images = JSON.parse(product.images || '[]'), statusClass = product.status === 'available' ? 'status-available' : 'status-sold', statusText = product.status === 'available' ? '在售' : '已售';
+            let html = `<div style="margin-bottom:16px;">`;
+            if (images.length > 0) html += `<img style="width:100%;max-height:400px;object-fit:contain;border-radius:8px;" src="${images[0]}" alt="${product.title}">`;
+            html += `<div style="padding:16px;"><div style="font-size:28px;font-weight:700;color:#ef4444;margin-bottom:12px;">¥${product.price || 0}</div><div style="margin-bottom:12px;"><span class="product-category">${product.category}</span> <span class="product-status ${statusClass}">${statusText}</span></div><h3 style="font-size:18px;color:#333;margin-bottom:12px;">${product.title}</h3>${product.description ? `<p style="color:#666;line-height:1.6;margin-bottom:16px;">${product.description}</p>` : ''}<div style="background:#f9fafb;padding:12px;border-radius:8px;margin-bottom:16px;"><div style="font-size:13px;color:#999;margin-bottom:4px;">联系方式</div><div style="font-size:16px;color:#333;font-weight:600;">${product.contact}</div></div>`;
+            if (isOwner) {
+                html += `<div style="display:flex;gap:10px;flex-wrap:wrap;">`;
+                html += product.status === 'available'
+                    ? `<button class="btn btn-success" style="flex:1;" onclick="myUpdateStatus(${product.id},'sold');closeDetailModal();">标记已售出</button>`
+                    : `<button class="btn btn-secondary" style="flex:1;" onclick="myUpdateStatus(${product.id},'available');closeDetailModal();">重新在售</button>`;
+                html += `<button class="btn btn-danger" style="flex:1;" onclick="if(confirm('确定删除?')){myDeleteProduct(${product.id});closeDetailModal();}">删除商品</button>`;
+                html += `</div>`;
+            }
+            html += `</div></div>`;
+            document.getElementById('detailContent').innerHTML = html;
+            document.getElementById('detailModal').classList.add('show');
+        }
         function closeDetailModal() { document.getElementById('detailModal').classList.remove('show'); }
+        async function myUpdateStatus(id, status) {
+            try {
+                const res = await fetch(`/api/products/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ status }) });
+                const data = await res.json();
+                if (data.success) { showToast('✅ 状态已更新'); if (currentTab === 'my') loadMyProducts(); }
+                else showToast('⚠️ ' + (data.error || '更新失败'));
+            } catch(e) { showToast('⚠️ 网络错误'); }
+        }
+        async function myDeleteProduct(id) {
+            try {
+                const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: { 'X-User-Id': JSON.parse(currentUser).id } });
+                const data = await res.json();
+                if (data.success) { showToast('✅ 删除成功'); if (currentTab === 'my') loadMyProducts(); }
+                else showToast('⚠️ ' + (data.error || '删除失败'));
+            } catch(e) { showToast('⚠️ 网络错误'); }
+        }
         async function loadMyProducts() {
             if (!currentUser) return;
             try {
@@ -267,25 +304,8 @@
             if (products.length === 0) { container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>你还没有发布商品</p><button class="btn btn-primary" style="margin-top:16px;max-width:200px;margin-left:auto;margin-right:auto;" onclick="openPublishModal()">发布商品</button></div>'; return; }
             container.innerHTML = products.map(p => {
                 const images = JSON.parse(p.images || '[]'), imageUrl = images[0] || '', statusClass = p.status === 'available' ? 'status-available' : 'status-sold', statusText = p.status === 'available' ? '在售' : '已售';
-                return `<div class="product-card"><div style="position:relative;">${imageUrl ? `<img class="product-image" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image" style="display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>'}</div><div class="product-info"><div class="product-category">${p.category}</div><div class="product-title">${p.title}</div><div class="product-price">${p.price || 0}</div><div class="my-product-actions"><span class="product-status ${statusClass}">${statusText}</span><div style="flex:1;"></div>${p.status === 'available' ? `<button class="btn btn-success btn-small" onclick="updateStatus(${p.id}, 'sold')">已售出</button>` : `<button class="btn btn-secondary btn-small" onclick="updateStatus(${p.id}, 'available')">重新在售</button>`}<button class="btn btn-danger btn-small" onclick="deleteProduct(${p.id})">删除</button></div></div></div>`;
+                return `<div class="product-card" onclick="showMyProductDetail(${p.id})"><div style="position:relative;">${imageUrl ? `<img class="product-image" src="${imageUrl}" alt="${p.title}">` : '<div class="product-image" style="display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>'}</div><div class="product-info"><div class="product-category">${p.category}</div><div class="product-title">${p.title}</div><div class="product-price">${p.price || 0}</div><span class="product-status ${statusClass}">${statusText}</span></div></div>`;
             }).join('');
-        }
-        async function updateStatus(id, status) {
-            try {
-                const res = await fetch(`/api/products/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ status }) });
-                const data = await res.json();
-                if (data.success) { showToast('✅ 状态已更新'); loadMyProducts(); }
-                else showToast('⚠️ ' + (data.error || '更新失败'));
-            } catch(e) { showToast('⚠️ 网络错误'); }
-        }
-        async function deleteProduct(id) {
-            if (!confirm('确定要删除这个商品吗？')) return;
-            try {
-                const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: { 'X-User-Id': JSON.parse(currentUser).id } });
-                const data = await res.json();
-                if (data.success) { showToast('✅ 删除成功'); loadMyProducts(); }
-                else showToast('⚠️ ' + (data.error || '删除失败'));
-            } catch(e) { showToast('⚠️ 网络错误'); }
         }
         async function loadAds() {
             try {

@@ -154,9 +154,9 @@ function verifyUserOrAdmin(req, res, next) {
   // 先检查是否是管理员
   const sessionId = req.headers['x-admin-session'];
   if (sessionId) {
-    return verifyAdmin(req, res, function(adminNextReq) {
-      adminNextReq.isAdmin = true;
-      return next(adminNextReq);
+    return verifyAdmin(req, res, function() {
+      req.isAdmin = true;
+      return next();
     });
   }
   
