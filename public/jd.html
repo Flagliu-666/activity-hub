@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>京东助力互助</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #FFF1F0, #FFD5CC);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        .header {
+            background: linear-gradient(135deg, #e1251b, #ff6b6b);
+            color: white;
+            padding: 20px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .back-btn {
+            font-size: 24px;
+            text-decoration: none;
+            color: white;
+        }
+        .header-title h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .header-title p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .group-banner {
+            margin: 12px 16px;
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1890ff, #096dd9);
+            box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
+        }
+        .banner-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .banner-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .banner-text .banner-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+        }
+        .banner-text .banner-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            margin-top: 2px;
+        }
+        .banner-arrow {
+            color: white;
+            font-size: 14px;
+        }
+        .submit-section {
+            margin: 0 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(225,37,27,0.08);
+        }
+        .submit-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .submit-input:focus {
+            border-color: #e1251b;
+        }
+        .submit-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            background: linear-gradient(135deg, #e1251b, #ff6b6b);
+        }
+        .code-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin: 0 16px 8px;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .code-card .link-text {
+            flex: 1;
+            font-size: 14px;
+            color: #1f2937;
+            word-break: break-all;
+            cursor: pointer;
+        }
+        .code-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .btn-copy, .btn-go {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-copy {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn-go {
+            background: linear-gradient(135deg, #e1251b, #ff6b6b);
+            color: white;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            border-top: 1px solid #f3f4f6;
+            z-index: 50;
+        }
+        .bottom-nav a {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0 12px;
+            text-decoration: none;
+            color: #9ca3af;
+            font-size: 11px;
+        }
+        .bottom-nav a.active {
+            color: #e1251b;
+        }
+        .bottom-nav .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-box {
+            background: white;
+            border-radius: 20px;
+            padding: 28px 24px 20px;
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+        }
+        .modal-qr-placeholder {
+            width: 180px;
+            height: 180px;
+            border-radius: 12px;
+            margin: 0 auto 14px;
+            overflow: hidden;
+        }
+        .modal-qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .modal-close {
+            background: #f0f2f5;
+            padding: 10px 36px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.82);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <a href="/" class="back-btn">←</a>
+            <div class="header-title">
+                <h1>京东助力互助</h1>
+                <p>京东外卖/红包组队 · 点击直接跳转</p>
+            </div>
+            <span class="badge" id="countBadge">-- 可用</span>
+        </div>
+    </div>
+
+    <div class="group-banner" onclick="showModal()">
+        <div class="banner-left">
+            <div class="banner-icon">👥</div>
+            <div class="banner-text">
+                <div class="banner-title">加入交流群</div>
+                <div class="banner-desc">群内互助，福利更多</div>
+            </div>
+        </div>
+        <div class="banner-arrow">进群 ›</div>
+    </div>
+
+    <div class="submit-section">
+        <div style="margin-bottom: 10px;">
+            <span style="color: #e1251b; font-weight: 600; font-size: 14px;">✏️ 提交京东活动链接</span>
+            <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">分享给其他人助力</span>
+        </div>
+        <input
+            type="text"
+            class="submit-input"
+            id="linkInput"
+            placeholder="粘贴京东链接（如 https://u.jd.com/xxx）"
+            autocomplete="off"
+        >
+        <button class="submit-btn" id="submitBtn" onclick="submitLink()">
+            提交链接
+        </button>
+    </div>
+
+    <div id="linkList" class="pb-20">
+        <div class="empty-state">
+            <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
+            <div>加载中...</div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/">
+            <span class="nav-icon">🏠</span> 首页
+        </a>
+        <a href="/jd.html" class="active">
+            <span class="nav-icon">🎫</span> 大厅
+        </a>
+        <a href="javascript:void(0)" onclick="document.getElementById('linkInput').focus(); document.getElementById('linkInput').scrollIntoView({behavior:'smooth'});">
+            <span class="nav-icon">✏️</span> 提交
+        </a>
+    </nav>
+
+    <div class="modal-overlay" id="modalGroup" onclick="hideModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div style="font-size: 17px; font-weight: 700; margin-bottom: 16px;">👥 扫码加入交流群</div>
+            <div class="modal-qr-placeholder">
+                <img src="../images/group-qr.jpg" alt="交流群二维码">
+            </div>
+            <div class="modal-close" onclick="hideModal()">关闭</div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let csrfToken = '';
+
+        async function init() {
+            try {
+                const r = await fetch('/api/csrf');
+                const d = await r.json();
+                csrfToken = d.token;
+            } catch(e) {}
+            await refreshStats();
+            loadLinks();
+        }
+
+        async function refreshStats() {
+            try {
+                const r = await fetch('/api/stats');
+                const d = await r.json();
+                document.getElementById('countBadge').textContent = d.available + ' 可用';
+            } catch(e) {}
+        }
+
+        async function loadLinks() {
+            try {
+                const r = await fetch('/api/codes?status=available');
+                const codes = await r.json();
+                renderLinks(codes);
+            } catch(e) {
+                document.getElementById('linkList').innerHTML =
+                    '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">❌</div><div>加载失败</div></div>';
+            }
+        }
+
+        function renderLinks(codes) {
+            const container = document.getElementById('linkList');
+            if (codes.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📭</div><div>暂无链接</div></div>';
+                return;
+            }
+            container.innerHTML = codes.map((c, i) => {
+                const displayUrl = c.code.length >= 5
+                    ? c.code.substring(0, 2) + '***' + c.code.substring(c.code.length - 3)
+                    : c.code;
+                return `
+                    <div class="code-card" style="animation: fadeUp 0.25s ease-out ${i * 0.03}s">
+                        <div class="link-text" onclick="copyLink('${c.code}', ${c.id})" title="点击复制">${displayUrl}</div>
+                        <div class="code-actions">
+                            <button class="btn-copy" onclick="copyLink('${c.code}', ${c.id})">📋 复制</button>
+                            <button class="btn-go" onclick="openLink('${c.code}', ${c.id})">🚀 跳转</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function copyLink(link, id) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).then(() => {
+                    showToast('✅ 已复制：' + link);
+                });
+            } else {
+                const el = document.createElement('textarea');
+                el.value = link;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showToast('✅ 已复制：' + link);
+            }
+        }
+
+        function openLink(link, id) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).catch(() => {});
+            }
+            fetch(`/api/codes/${id}/use`, { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
+            showToast('✅ 已复制，正在打开京东...');
+            setTimeout(() => {
+                window.location.href = link;
+            }, 300);
+            setTimeout(() => {
+                refreshStats();
+                loadLinks();
+            }, 1500);
+        }
+
+        async function submitLink() {
+            const input = document.getElementById('linkInput');
+            const link = input.value.trim();
+            if (!link) {
+                showToast('⚠️ 请输入链接');
+                return;
+            }
+            if (!link.includes('jd.com') && !link.includes('u.jd.com')) {
+                showToast('⚠️ 请输入京东链接（包含 jd.com）');
+                return;
+            }
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = '提交中...';
+            try {
+                const r = await fetch('/api/codes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({ code: link })
+                });
+                const d = await r.json();
+                if (r.ok) {
+                    showToast('✅ 提交成功！');
+                    input.value = '';
+                    csrfToken = d.token || csrfToken;
+                    await refreshStats();
+                    loadLinks();
+                } else {
+                    showToast('⚠️ ' + (d.error || '提交失败'));
+                }
+            } catch(e) {
+                showToast('⚠️ 网络错误');
+            }
+            btn.disabled = false;
+            btn.textContent = '提交链接';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function showModal() {
+            document.getElementById('modalGroup').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function hideModal() {
+            document.getElementById('modalGroup').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('linkInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') submitLink();
+            });
+        });
+
+        setInterval(() => {
+            if (!document.hidden) refreshStats();
+        }, 60000);
+
+        init();
+    </script>
+</body>
+</html>

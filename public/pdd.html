@@ -9,7 +9,6 @@
     <meta property="og:title" content="活动互助站 - 拼多多福袋互助">
     <meta property="og:description" content="拼多多福袋互助，一键复制邀请码，快速完成任务">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -23,11 +22,6 @@
         .btn-primary:active {
             background: linear-gradient(135deg, #EA580C 0%, #D97706 100%);
         }
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
-        }
         .code-item {
             animation: fadeUp 0.25s ease-out;
         }
@@ -35,44 +29,20 @@
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .code-text {
-            font-family: 'Courier New', monospace;
-            letter-spacing: 0.15em;
-            font-weight: 700;
-        }
 
-        /* 微信关注横幅 */
-        .wechat-banner, .group-banner {
-            margin: 12px 16px;
-            border-radius: 14px;
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        .wechat-banner:active, .group-banner:active { transform: scale(0.98); }
-        .wechat-banner {
-            background: linear-gradient(135deg, #07c160 0%, #1aad19 100%);
-            box-shadow: 0 4px 15px rgba(7, 193, 96, 0.3);
-        }
+        /* 入群横幅 */
         .group-banner {
-            background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%);
-            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+            margin: 12px 16px; border-radius: 14px;
+            padding: 14px 18px;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            cursor: pointer; position: relative; overflow: hidden;
+            transition: transform 0.2s;
         }
-        .wechat-banner::before, .group-banner::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
-            animation: bannerPulse 4s ease-in-out infinite;
-        }
-        @keyframes bannerPulse {
-            0%, 100% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.15); opacity: 0.8; }
+        .group-banner:active { transform: scale(0.98); }
+        .group-banner {
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
         }
         .banner-left {
             display: flex; align-items: center; gap: 12px;
@@ -91,21 +61,16 @@
             font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;
         }
         .banner-arrow {
-            color: white; font-size: 14px; position: relative;
-            flex-shrink: 0; opacity: 0.9;
+            color: white; font-size: 14px; position: relative; flex-shrink: 0; opacity: 0.9;
         }
 
         /* Tab 标签栏 */
         .tab-btn {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
+            padding: 8px 20px; border-radius: 20px;
+            font-size: 14px; font-weight: 500;
+            border: none; cursor: pointer;
             transition: all 0.2s;
-            background: #f3f4f6;
-            color: #6b7280;
+            background: #f3f4f6; color: #6b7280;
             white-space: nowrap;
         }
         .tab-btn.active {
@@ -114,25 +79,19 @@
             box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
         }
         .tab-btn .tab-count {
-            font-size: 11px;
-            margin-left: 4px;
+            font-size: 11px; margin-left: 4px;
         }
 
         /* 提交表单区 */
         .submit-section {
-            margin: 0 16px;
-            padding: 16px;
-            background: white;
-            border-radius: 16px;
+            margin: 0 16px; padding: 16px;
+            background: white; border-radius: 16px;
             box-shadow: 0 2px 8px rgba(249,115,22,0.08);
         }
         .submit-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 18px;
-            text-align: center;
+            width: 100%; padding: 12px 16px;
+            border: 2px solid #e5e7eb; border-radius: 12px;
+            font-size: 18px; text-align: center;
             letter-spacing: 0.1em;
             font-family: 'Courier New', monospace;
             font-weight: 600;
@@ -143,67 +102,46 @@
             border-color: #F97316;
         }
         .submit-btn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
+            width: 100%; margin-top: 10px; padding: 12px;
+            border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 600;
+            color: white; cursor: pointer;
         }
 
         /* 邀请码卡片 */
         .code-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
+            display: flex; align-items: center;
+            gap: 12px; padding: 14px 16px;
             margin: 0 16px 8px;
-            background: white;
-            border-radius: 14px;
+            background: white; border-radius: 14px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
         .code-card.used {
-            opacity: 0.55;
-            background: #f9fafb;
+            opacity: 0.55; background: #f9fafb;
         }
         .code-card .code-num {
-            flex: 1;
-            font-size: 18px;
+            flex: 1; font-size: 18px;
             font-family: 'Courier New', monospace;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            color: #1f2937;
-            cursor: pointer;
+            font-weight: 700; letter-spacing: 0.12em;
+            color: #1f2937; cursor: pointer;
             user-select: all;
         }
         .code-card.used .code-num {
-            text-decoration: line-through;
-            color: #9ca3af;
+            text-decoration: line-through; color: #9ca3af;
         }
         .code-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
+            display: flex; gap: 8px; flex-shrink: 0;
         }
         .btn-copy, .btn-go {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
+            padding: 8px 14px; border: none;
+            border-radius: 8px; font-size: 13px;
+            font-weight: 600; cursor: pointer;
             transition: all 0.15s;
         }
         .btn-copy {
-            background: #f3f4f6;
-            color: #374151;
+            background: #f3f4f6; color: #374151;
         }
-        .btn-copy:active {
-            background: #e5e7eb;
-        }
+        .btn-copy:active { background: #e5e7eb; }
         .btn-go {
             background: linear-gradient(135deg, #F97316, #F59E0B);
             color: white;
@@ -212,64 +150,44 @@
             background: linear-gradient(135deg, #EA580C, #D97706);
         }
         .code-card.used .btn-go {
-            background: #d1d5db;
-            color: #9ca3af;
+            background: #d1d5db; color: #9ca3af;
             cursor: not-allowed;
         }
         .time-label {
-            font-size: 11px;
-            color: #9ca3af;
-            text-align: center;
-            margin-top: -4px;
+            font-size: 11px; color: #9ca3af;
+            text-align: center; margin-top: -4px;
             margin-bottom: 8px;
         }
 
         /* 底部导航 */
         .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            display: flex;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; display: flex;
             border-top: 1px solid #f3f4f6;
             z-index: 50;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
         }
         .bottom-nav a {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             padding: 8px 0 12px;
-            text-decoration: none;
-            color: #9ca3af;
-            font-size: 11px;
-            transition: color 0.2s;
+            text-decoration: none; color: #9ca3af;
+            font-size: 11px; transition: color 0.2s;
         }
-        .bottom-nav a.active {
-            color: #F97316;
-        }
+        .bottom-nav a.active { color: #F97316; }
         .bottom-nav a .nav-icon {
-            font-size: 20px;
-            margin-bottom: 2px;
+            font-size: 20px; margin-bottom: 2px;
         }
 
         /* Toast */
         .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
+            position: fixed; top: 20px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.82);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            white-space: nowrap;
+            background: rgba(0,0,0,0.82); color: white;
+            padding: 10px 20px; border-radius: 20px;
+            font-size: 14px; z-index: 2000;
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; white-space: nowrap;
         }
         .toast.show { opacity: 1; }
 
@@ -283,17 +201,13 @@
             z-index: 1000;
         }
         .modal-overlay.show {
-            display: flex;
-            animation: fadeIn 0.25s ease;
+            display: flex; animation: fadeIn 0.25s ease;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-box {
-            background: white;
-            border-radius: 20px;
-            padding: 28px 24px 20px;
-            text-align: center;
-            max-width: 300px;
-            width: 90%;
+            background: white; border-radius: 20px;
+            padding: 28px 24px 20px; text-align: center;
+            max-width: 300px; width: 90%;
             animation: modalPop 0.3s ease;
         }
         @keyframes modalPop {
@@ -303,35 +217,29 @@
         .modal-box .modal-title {
             font-size: 17px; font-weight: 700; margin-bottom: 16px;
         }
-        .modal-box .qr-placeholder {
-            width: 180px; height: 180px;
-            border-radius: 12px;
+        .modal-box .modal-qr-placeholder {
+            width: 180px; height: 180px; border-radius: 12px;
             margin: 0 auto 14px;
             background: #f3f4f6;
             display: flex; align-items: center; justify-content: center;
             color: #9ca3af; font-size: 13px;
+            overflow: hidden;
+        }
+        .modal-box .modal-qr-placeholder img {
+            width: 100%; height: 100%; object-fit: cover;
         }
         .modal-box .modal-close {
-            background: #f0f2f5;
-            color: #6b7280;
-            padding: 10px 36px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-block;
+            background: #f0f2f5; color: #6b7280;
+            padding: 10px 36px; border-radius: 20px;
+            font-size: 14px; font-weight: 500;
+            cursor: pointer; display: inline-block;
         }
 
         /* 空状态 */
         .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #9ca3af;
+            text-align: center; padding: 40px 20px; color: #9ca3af;
         }
-        .empty-state .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -348,18 +256,6 @@
             </div>
             <span class="text-sm bg-white/20 px-2 py-1 rounded" id="countBadge">-- 可用</span>
         </div>
-    </div>
-
-    <!-- ===== 微信关注横幅 ===== -->
-    <div class="wechat-banner" onclick="showModal('wechat')">
-        <div class="banner-left">
-            <div class="banner-icon">💬</div>
-            <div class="banner-text">
-                <div class="banner-title">关注公众号</div>
-                <div class="banner-desc">获取最新活动通知</div>
-            </div>
-        </div>
-        <div class="banner-arrow">去关注 ›</div>
     </div>
 
     <!-- ===== 入群横幅 ===== -->
@@ -431,18 +327,13 @@
         </a>
     </nav>
 
-    <!-- ===== 公众号弹窗 ===== -->
-    <div class="modal-overlay" id="modalWechat" onclick="hideModal('wechat')">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-title">💬 微信扫码关注</div>
-            <div class="qr-placeholder">公众号二维码<br>（请替换为真实图片）</div>
-            <div class="modal-close" onclick="hideModal('wechat')">关闭</div>
-        </div>
-    </div>
+    <!-- ===== 弹窗 ===== -->
     <div class="modal-overlay" id="modalGroup" onclick="hideModal('group')">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-title">👥 扫码加入交流群</div>
-            <div class="qr-placeholder">群二维码<br>（请替换为真实图片）</div>
+            <div class="modal-qr-placeholder">
+                <img src="../images/group-qr.jpg" alt="交流群二维码">
+            </div>
             <div class="modal-close" onclick="hideModal('group')">关闭</div>
         </div>
     </div>
@@ -506,7 +397,7 @@
             }
         }
 
-        // ===== 渲染邀请码 =====
+        // ===== 渲染邀请码（显示前2位+*+后3位） =====
         function renderCodes(codes, filter) {
             const container = document.getElementById('codeList');
 
@@ -522,13 +413,18 @@
 
             container.innerHTML = codes.map((c, i) => {
                 const isUsed = c.status === 'used';
+                // 隐藏中间数字：前2位 + *** + 后3位
+                const displayCode = c.code.length >= 5
+                    ? c.code.substring(0, 2) + '***' + c.code.substring(c.code.length - 3)
+                    : c.code;
+
                 const timeStr = isUsed
                     ? `<div class="time-label">已使用于 ${formatTime(c.used_at)}</div>`
                     : `<div class="time-label">提交于 ${formatTime(c.created_at)}</div>`;
 
                 return `
                     <div class="code-card code-item ${isUsed ? 'used' : ''}" style="animation-delay:${i * 0.03}s">
-                        <div class="code-num" onclick="copyCode('${c.code}', ${c.id})" title="点击复制">${c.code}</div>
+                        <div class="code-num" onclick="copyCode('${c.code}', ${c.id})" title="点击复制">${displayCode}</div>
                         <div class="code-actions">
                             <button class="btn-copy" onclick="copyCode('${c.code}', ${c.id})">
                                 📋 复制

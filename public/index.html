@@ -87,8 +87,8 @@
             font-size: 12px; color: var(--text-secondary); margin-top: 4px;
         }
 
-        /* ===== 微信横幅 ===== */
-        .wechat-banner, .group-banner {
+        /* ===== 入群横幅 ===== */
+        .group-banner {
             margin: 12px 16px; border-radius: 14px;
             padding: 14px 18px;
             display: flex; align-items: center;
@@ -96,16 +96,12 @@
             cursor: pointer; position: relative; overflow: hidden;
             transition: transform 0.2s;
         }
-        .wechat-banner:active, .group-banner:active { transform: scale(0.98); }
-        .wechat-banner {
-            background: linear-gradient(135deg, #07c160 0%, #05a34e 100%);
-            box-shadow: 0 4px 15px rgba(7, 193, 96, 0.3);
-        }
+        .group-banner:active { transform: scale(0.98); }
         .group-banner {
             background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
             box-shadow: 0 4px 15px rgba(24, 144, 255, 0.3);
         }
-        .wechat-banner::before, .group-banner::before {
+        .group-banner::before {
             content: '';
             position: absolute; top: -50%; left: -50%;
             width: 200%; height: 200%;
@@ -136,12 +132,26 @@
             color: white; font-size: 14px; position: relative; flex-shrink: 0; opacity: 0.9;
         }
 
-        /* ===== 活动区域 ===== */
+        /* ===== 热门活动区域 ===== */
         .section { padding: 20px 16px 10px; }
         .section-title {
             font-size: 17px; font-weight: 700;
             display: flex; align-items: center; gap: 8px;
             margin-bottom: 12px;
+        }
+        .hot-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #ff6b00, #ff8f00);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            animation: hotPulse 2s ease-in-out infinite;
+        }
+        @keyframes hotPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .activity-card {
@@ -165,6 +175,8 @@
         }
         .ac-icon.orange { background: linear-gradient(135deg, #ff6b00, #ff8f00); }
         .ac-icon.red    { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .ac-icon.blue   { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .ac-icon.green  { background: linear-gradient(135deg, #10b981, #34d399); }
         .ac-info { flex: 1; min-width: 0; }
         .ac-name { font-size: 15px; font-weight: 600; }
         .ac-desc { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
@@ -183,9 +195,6 @@
         }
         .footer-text {
             font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;
-        }
-        .footer-contact {
-            font-size: 13px; color: var(--primary); font-weight: 500;
         }
         .footer-copy {
             font-size: 11px; color: #c0c0c0; margin-top: 12px;
@@ -221,6 +230,10 @@
             background: #f3f4f6;
             display: flex; align-items: center; justify-content: center;
             color: #9ca3af; font-size: 13px;
+            overflow: hidden;
+        }
+        .modal-box .modal-qr-placeholder img {
+            width: 100%; height: 100%; object-fit: cover;
         }
         .modal-box .modal-close {
             background: #f0f2f5; color: #6b7280;
@@ -255,7 +268,7 @@
     <!-- ===== 统计卡片 ===== -->
     <div class="stats">
         <div class="stat-card">
-            <div class="stat-num" id="statActivity">3</div>
+            <div class="stat-num" id="statActivity">4</div>
             <div class="stat-label">进行中活动</div>
         </div>
         <div class="stat-card">
@@ -266,18 +279,6 @@
             <div class="stat-num" id="statUsed">--</div>
             <div class="stat-label">已助力人次</div>
         </div>
-    </div>
-
-    <!-- ===== 微信关注横幅 ===== -->
-    <div class="wechat-banner" onclick="showModal('wechat')">
-        <div class="banner-left">
-            <div class="banner-icon">💬</div>
-            <div class="banner-text">
-                <div class="banner-title">关注公众号</div>
-                <div class="banner-desc">获取最新活动通知</div>
-            </div>
-        </div>
-        <div class="banner-arrow">去关注 ›</div>
     </div>
 
     <!-- ===== 入群横幅 ===== -->
@@ -292,9 +293,11 @@
         <div class="banner-arrow">加入群聊 ›</div>
     </div>
 
-    <!-- ===== 活动列表 ===== -->
+    <!-- ===== 今日热门活动 ===== -->
     <section class="section">
-        <div class="section-title">🎯 选择活动</div>
+        <div class="section-title">
+            🔥 今日热门活动 <span class="hot-badge">🔥 HOT</span>
+        </div>
 
         <a href="/pdd.html" class="activity-card">
             <div class="ac-icon orange">🎁</div>
@@ -305,22 +308,27 @@
             </div>
             <span class="ac-arrow">›</span>
         </a>
+    </section>
 
-        <a href="javascript:void(0)" class="activity-card" onclick="showToast('即将上线，敬请期待')">
+    <!-- ===== 选择活动 ===== -->
+    <section class="section">
+        <div class="section-title">🎯 选择活动</div>
+
+        <a href="/jd.html" class="activity-card">
             <div class="ac-icon red">🛒</div>
             <div class="ac-info">
                 <div class="ac-name">京东助力互助</div>
-                <div class="ac-desc">京东红包/京豆助力换码</div>
-                <div class="ac-meta">🔜 即将上线</div>
+                <div class="ac-desc">京东外卖/红包组队互助，点击直接跳转</div>
+                <div class="ac-meta">🔁 实时可用 · 点击进入</div>
             </div>
             <span class="ac-arrow">›</span>
         </a>
 
         <a href="javascript:void(0)" class="activity-card" onclick="showToast('即将上线，敬请期待')">
-            <div class="ac-icon red" style="background:linear-gradient(135deg, #14b8a6, #2dd4bf)">🍔</div>
+            <div class="ac-icon green">🍔</div>
             <div class="ac-info">
-                <div class="ac-name">美团外卖互助</div>
-                <div class="ac-desc">美团红包/优惠券互助</div>
+                <div class="ac-name">组队互助</div>
+                <div class="ac-desc">美团/饿了么等组队活动</div>
                 <div class="ac-meta">🔜 即将上线</div>
             </div>
             <span class="ac-arrow">›</span>
@@ -329,23 +337,16 @@
 
     <!-- ===== 底部 ===== -->
     <footer class="footer">
-        <div class="footer-text">扫码关注公众号</div>
-        <div class="footer-contact">微信：your_wechat_id</div>
         <div class="footer-copy">© 2026 活动互助站 · 互助让生活更美好</div>
     </footer>
 
     <!-- ===== 弹窗 ===== -->
-    <div class="modal-overlay" id="modalWechat" onclick="hideModal('wechat')">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-title">💬 微信扫码关注</div>
-            <div class="modal-qr-placeholder">公众号二维码<br>（请替换为真实图片）</div>
-            <div class="modal-close" onclick="hideModal('wechat')">关闭</div>
-        </div>
-    </div>
     <div class="modal-overlay" id="modalGroup" onclick="hideModal('group')">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-title">👥 扫码加入交流群</div>
-            <div class="modal-qr-placeholder">群二维码<br>（请替换为真实图片）</div>
+            <div class="modal-qr-placeholder">
+                <img src="images/group-qr.jpg" alt="交流群二维码">
+            </div>
             <div class="modal-close" onclick="hideModal('group')">关闭</div>
         </div>
     </div>
