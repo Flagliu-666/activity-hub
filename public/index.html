@@ -126,6 +126,7 @@
                 <div class="form-group"><label class="form-label">分类</label><select class="form-select" id="productCategory"><option value="百货">百货</option><option value="书本">书本</option><option value="美妆">美妆</option><option value="衣服">衣服</option><option value="虚拟商品">虚拟商品</option></select></div>
                 <div class="form-group"><label class="form-label">价格（元）</label><input type="number" class="form-input" id="productPrice" placeholder="0.00" step="0.01" min="0"></div>
                 <div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="productDesc" placeholder="商品描述"></textarea></div>
+                <div class="form-group"><label class="form-label">图片</label><input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)"><div id="imagePreview" style="margin-top:8px;"></div><button type="button" class="btn btn-secondary" style="width:100%;" onclick="document.getElementById('imageInput').click()">📷 选择图片</button></div>
                 <div class="form-group"><label class="form-label">联系方式 *</label><input type="text" class="form-input" id="productContact" placeholder="微信/手机号"></div>
                 <button class="btn btn-primary" onclick="publishProduct()">发布商品</button>
             </div>
@@ -148,7 +149,7 @@
     </div>
     <div class="toast" id="toast"></div>
     <script>
-        let currentCategory = 'all', currentUser = localStorage.getItem('current_user'), currentTab = 'home', initialLoadDone = false;
+        let currentCategory = 'all', currentUser = localStorage.getItem('current_user'), currentTab = 'home', uploadedImage = null, initialLoadDone = false;
         function fetchWithTimeout(url, options = {}, timeout = 8000) {
             return Promise.race([
                 fetch(url, options),
@@ -201,15 +202,28 @@
             else if (tab === 'platform') { document.getElementById('platformModal').classList.add('show'); }
         }
         function closePlatformModal() { document.getElementById('platformModal').classList.remove('show'); }
-        function openPublishModal() { if (!currentUser) { openLoginModal(); return; } document.getElementById('publishModal').classList.add('show'); }
+        function openPublishModal() { if (!currentUser) { openLoginModal(); return; } uploadedImage = null; document.getElementById('imagePreview').innerHTML = ''; document.getElementById('imageInput').value = ''; document.getElementById('publishModal').classList.add('show'); }
         function closePublishModal() { document.getElementById('publishModal').classList.remove('show'); }
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) { uploadedImage = e.target.result; renderImagePreview(); };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+        function renderImagePreview() {
+            document.getElementById('imagePreview').innerHTML = uploadedImage
+                ? `<div style="width:120px;height:120px;border-radius:8px;overflow:hidden;position:relative;display:inline-block;margin:4px;border:2px solid #e5e7eb;"><img src="${uploadedImage}" style="width:100%;height:100%;object-fit:cover;"><button onclick="uploadedImage=null;renderImagePreview();" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:14px;line-height:24px;">×</button></div>`
+                : '';
+        }
         async function publishProduct() {
             const title = document.getElementById('productTitle').value.trim(), category = document.getElementById('productCategory').value, price = parseFloat(document.getElementById('productPrice').value) || 0, desc = document.getElementById('productDesc').value.trim(), contact = document.getElementById('productContact').value.trim();
             if (!title || !contact) { showToast('⚠️ 请填写标题和联系方式'); return; }
             try {
-                const res = await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ user_id: JSON.parse(currentUser).id, title, category, price, description: desc, images: [], contact }) });
+                const res = await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': JSON.parse(currentUser).id }, body: JSON.stringify({ user_id: JSON.parse(currentUser).id, title, category, price, description: desc, images: uploadedImage ? [uploadedImage] : [], contact }) });
                 const data = await res.json();
-                if (data.success) { showToast('✅ 发布成功'); closePublishModal(); document.getElementById('productTitle').value = ''; document.getElementById('productPrice').value = ''; document.getElementById('productDesc').value = ''; document.getElementById('productContact').value = ''; if (currentTab === 'my') loadMyProducts(); else loadProducts(); }
+                if (data.success) { showToast('✅ 发布成功'); closePublishModal(); document.getElementById('productTitle').value = ''; document.getElementById('productPrice').value = ''; document.getElementById('productDesc').value = ''; document.getElementById('productContact').value = ''; uploadedImage = null; document.getElementById('imagePreview').innerHTML = ''; if (currentTab === 'my') loadMyProducts(); else loadProducts(); }
                 else showToast('⚠️ ' + (data.error || '发布失败'));
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
