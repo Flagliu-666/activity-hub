@@ -169,7 +169,7 @@
                 const res = await fetch('/api/user/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: studentId, password }) });
                 const data = await res.json();
                 if (data.success) { localStorage.setItem('current_user', JSON.stringify(data.user)); currentUser = JSON.stringify(data.user); showToast('✅ 登录成功'); closeLoginModal(); updateUserArea(); }
-                else { showToast('⚠️ 学号或密码错误'); }
+                else { showToast('⚠️ ' + (data.error || '登录失败')); }
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
         async function handleRegister() {

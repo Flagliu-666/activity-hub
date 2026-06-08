@@ -460,7 +460,7 @@ app.post('/api/user/register', (req, res) => {
     res.json({ success: true });
   } catch(e) {
     if (e.message.includes('UNIQUE')) {
-      res.status(400).json({ error: '该学号已注册' });
+      res.status(400).json({ error: '该学号已注册，若密码忘记请联系管理员' });
     } else {
       res.status(500).json({ error: '注册失败' });
     }
@@ -478,17 +478,25 @@ app.post('/api/user/login', (req, res) => {
   const passwordHash = hashPassword(password);
   
   try {
-    const stmt = db.prepare('SELECT * FROM users WHERE student_id = ? AND password = ?');
-    stmt.bind([student_id, passwordHash]);
-    let user = null;
-    if (stmt.step()) {
-      user = stmt.getAsObject();
+    // 先查学号是否存在
+    const findStmt = db.prepare('SELECT * FROM users WHERE student_id = ?');
+    findStmt.bind([student_id]);
+    let userBySid = null;
+    if (findStmt.step()) {
+      userBySid = findStmt.getAsObject();
     }
-    stmt.free();
+    findStmt.free();
     
-    if (!user) {
-      return res.status(401).json({ error: '学号或密码错误' });
+    if (!userBySid) {
+      return res.status(401).json({ error: '该学号未注册' });
     }
+    
+    // 学号存在，再校验密码
+    if (userBySid.password !== passwordHash) {
+      return res.status(401).json({ error: '密码错误，若密码忘记请联系管理员' });
+    }
+    
+    const user = userBySid;
     
     res.json({
       success: true,
