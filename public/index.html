@@ -210,7 +210,14 @@
                 const res = await fetch('/api/user/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: studentId, name, password }) });
                 const data = await res.json();
                 if (data.success) { showToast('✅ 注册成功，请登录'); showLoginForm(); document.getElementById('loginStudentId').value = studentId; }
-                else { showToast('⚠️ ' + (data.error || '注册失败')); }
+                else {
+                    showToast('⚠️ ' + (data.error || '注册失败'));
+                    // 如果学号已注册，自动切换到登录界面并填入学号
+                    if (data.error && data.error.includes('已注册')) {
+                        showLoginForm();
+                        document.getElementById('loginStudentId').value = studentId;
+                    }
+                }
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
         function logout() { if (confirm('确定要退出登录吗？')) { localStorage.removeItem('current_user'); currentUser = null; updateUserArea(); showToast('已退出登录'); } }

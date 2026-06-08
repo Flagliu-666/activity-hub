@@ -88,6 +88,11 @@
                 <div class="form-group"><label class="form-label">客服微信/手机号</label><input type="text" class="form-input" id="platformContact" placeholder="例如：17533304569"></div>
                 <button class="btn btn-primary" onclick="saveSettings()" style="width:100%;">保存设置</button>
             </div>
+            <div class="card">
+                <div class="card-title">📥 用户数据导出</div>
+                <p style="color:#999;font-size:13px;margin-bottom:12px;">下载所有注册用户的学号、姓名、密码(加密)、发布商品列表为CSV文件。可用于查询忘记密码的用户。</p>
+                <button class="btn btn-success" onclick="downloadUsersCSV()" style="width:100%;">⬇️ 下载用户数据 CSV</button>
+            </div>
         </div>
         <div id="tab-admins" class="section">
             <div class="card">
@@ -256,6 +261,23 @@
                 const data = await res.json();
                 if (data.success) showToast('✅ 设置已保存');
                 else showToast('⚠️ ' + (data.error || '保存失败'));
+            } catch(e) { showToast('⚠️ 网络错误'); }
+        }
+        async function downloadUsersCSV() {
+            try {
+                showToast('正在生成CSV...');
+                const res = await fetch('/api/admin/users-csv', { headers: { 'X-Admin-Session': adminSession } });
+                if (!res.ok) { const err = await res.json(); showToast('⚠️ ' + (err.error || '下载失败')); return; }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'users_' + new Date().toISOString().slice(0,10) + '.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('✅ CSV已下载');
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
         let isAuthChecked = false;

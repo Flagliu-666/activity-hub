@@ -10,6 +10,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const DB_PATH = path.join(__dirname, 'data.db');
+const CSV_PATH = path.join(__dirname, 'users.csv');
 let db;
 
 // ===== 数据库初始化 =====
@@ -121,12 +122,45 @@ async function initDB() {
   }
 
   saveDB();
+  syncUsersCSV();
   console.log('📦 数据库已初始化');
 }
 
 function saveDB() {
   const data = db.export();
   fs.writeFileSync(DB_PATH, Buffer.from(data));
+}
+
+// 同步用户数据到 CSV（每次注册/发布/删除商品后调用）
+function syncUsersCSV() {
+  try {
+    const rows = [];
+    // 查询所有用户及各自发布的商品
+    const userStmt = db.prepare('SELECT * FROM users ORDER BY student_id');
+    while (userStmt.step()) {
+      const user = userStmt.getAsObject();
+      const products = [];
+      const prodStmt = db.prepare('SELECT id, title FROM products WHERE user_id = ? ORDER BY id');
+      prodStmt.bind([user.id]);
+      while (prodStmt.step()) {
+        const p = prodStmt.getAsObject();
+        products.push(p.id + ':' + p.title.replace(/,/g, '，').replace(/"/g, '""'));
+      }
+      prodStmt.free();
+      // CSV 行: student_id, name, password_hash, product_count, product_list
+      const productList = products.join(';');
+      const escapedName = (user.name || '').replace(/,/g, '，').replace(/"/g, '""');
+      rows.push(`"${user.student_id}","${escapedName}","${user.password}","${products.length}","${productList}"`);
+    }
+    userStmt.free();
+    
+    const header = 'student_id,name,password_hash,product_count,product_list';
+    const csv = [header, ...rows].join('\n');
+    fs.writeFileSync(CSV_PATH, csv + '\n', 'utf-8');
+    console.log('📄 用户CSV已同步，共', rows.length, '条记录');
+  } catch(e) {
+    console.error('同步CSV失败:', e.message);
+  }
 }
 
 // ===== 管理员认证 =====
@@ -269,6 +303,7 @@ app.post('/api/products', (req, res) => {
       [user_id, title, description || '', category || '百货', price || 0, imagesJson, contact]
     );
     saveDB();
+    syncUsersCSV();
     res.json({ success: true });
   } catch(e) {
     console.error('添加商品失败:', e.message);
@@ -348,6 +383,7 @@ app.put('/api/products/:id', verifyUserOrAdmin, (req, res) => {
       [title, description || '', category || '百货', price || 0, imagesJson, contact, id]
     );
     saveDB();
+    syncUsersCSV();
     res.json({ success: true });
   } catch(e) {
     console.error('更新商品失败:', e.message);
@@ -378,6 +414,7 @@ app.delete('/api/products/:id', verifyUserOrAdmin, (req, res) => {
     
     db.run('DELETE FROM products WHERE id = ?', [id]);
     saveDB();
+    syncUsersCSV();
     res.json({ success: true });
   } catch(e) {
     console.error('删除商品失败:', e.message);
@@ -470,10 +507,11 @@ app.post('/api/user/register', (req, res) => {
       [student_id, name || '', passwordHash]
     );
     saveDB();
+    syncUsersCSV();
     res.json({ success: true });
   } catch(e) {
     if (e.message.includes('UNIQUE')) {
-      res.status(400).json({ error: '该学号已注册，若密码忘记请联系管理员' });
+      res.status(400).json({ error: '该账号已注册，请直接登录，若密码忘记请联系管理员' });
     } else {
       res.status(500).json({ error: '注册失败' });
     }
@@ -622,6 +660,24 @@ app.post('/api/admin/logout', verifyAdmin, (req, res) => {
 });
 
 // ===== 设置接口 =====
+// 下载用户CSV（仅管理员）
+app.get('/api/admin/users-csv', verifyAdmin, (req, res) => {
+  try {
+    syncUsersCSV(); // 先同步最新数据
+    if (!fs.existsSync(CSV_PATH)) {
+      return res.status(404).json({ error: 'CSV 文件不存在，请先确保有用户注册' });
+    }
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="users_' + new Date().toISOString().slice(0,10) + '.csv"');
+    const csvContent = fs.readFileSync(CSV_PATH, 'utf-8');
+    // 添加 BOM 头确保 Excel 正确识别中文
+    res.send('\ufeff' + csvContent);
+  } catch(e) {
+    console.error('下载CSV失败:', e.message);
+    res.status(500).json({ error: '下载失败' });
+  }
+});
+
 // 获取设置（公开）
 app.get('/api/settings', (req, res) => {
   const results = {};
