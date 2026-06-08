@@ -141,15 +141,37 @@
     <div class="modal" id="platformModal">
         <div class="modal-content" style="max-width:500px;margin:20px auto;border-radius:20px;">
             <div class="modal-header"><div class="modal-title">联系平台</div><button class="modal-close" onclick="closePlatformModal()">×</button></div>
-            <div class="modal-body" style="text-align:center;">
+            <div class="modal-body" style="text-align:center;" id="platformContent">
                 <p style="font-size:28px;font-weight:700;color:#333;margin-bottom:12px;">客服微信：</p>
-                <p style="font-size:32px;font-weight:700;color:#667eea;margin-bottom:20px;">17533304569</p>
+                <p style="font-size:32px;font-weight:700;color:#667eea;margin-bottom:20px;">加载中...</p>
             </div>
         </div>
     </div>
     <div class="toast" id="toast"></div>
     <script>
-        let currentCategory = 'all', currentUser = localStorage.getItem('current_user'), currentTab = 'home', uploadedImage = null, initialLoadDone = false;
+        let currentCategory = 'all', currentUser = localStorage.getItem('current_user'), currentTab = 'home', uploadedImage = null, platformContact = '';
+
+        // 图片压缩：最大宽度800px，JPEG质量0.7，大幅减小上传体积
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const maxW = 800;
+                        let w = img.width, h = img.height;
+                        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
         function fetchWithTimeout(url, options = {}, timeout = 8000) {
             return Promise.race([
                 fetch(url, options),
@@ -199,17 +221,17 @@
             event.target.closest('a').classList.add('active');
             if (tab === 'home') { loadProducts(); loadAds(); }
             else if (tab === 'my') { if (!currentUser) { openLoginModal(); return; } loadMyProducts(); }
-            else if (tab === 'platform') { document.getElementById('platformModal').classList.add('show'); }
+            else if (tab === 'platform') { loadPlatformContact(); document.getElementById('platformModal').classList.add('show'); }
         }
         function closePlatformModal() { document.getElementById('platformModal').classList.remove('show'); }
         function openPublishModal() { if (!currentUser) { openLoginModal(); return; } uploadedImage = null; document.getElementById('imagePreview').innerHTML = ''; document.getElementById('imageInput').value = ''; document.getElementById('publishModal').classList.add('show'); }
         function closePublishModal() { document.getElementById('publishModal').classList.remove('show'); }
-        function handleImageUpload(event) {
+        async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) { uploadedImage = e.target.result; renderImagePreview(); };
-            reader.readAsDataURL(file);
+            showToast('图片压缩中...');
+            uploadedImage = await compressImage(file);
+            renderImagePreview();
             event.target.value = '';
         }
         function renderImagePreview() {
@@ -326,6 +348,16 @@
                 const linkClose = ad.link_url ? `</a>` : '';
                 return `<div class="ad-strip" ${ad.link_url ? `onclick="window.open('${ad.link_url}','_blank')"` : ''}><div class="ad-strip-line1">${ad.title}${ad.description ? ' · ' + ad.description : ''}</div><div class="ad-strip-line2">${ad.link_url || ''}</div></div>`;
             }).join('');
+        }
+        async function loadPlatformContact() {
+            try {
+                const res = await fetchWithTimeout('/api/settings');
+                const settings = await res.json();
+                platformContact = settings.platform_contact || '17533304569';
+                document.getElementById('platformContent').innerHTML = `<p style="font-size:28px;font-weight:700;color:#333;margin-bottom:12px;">客服微信：</p><p style="font-size:32px;font-weight:700;color:#667eea;margin-bottom:20px;">${platformContact}</p>`;
+            } catch(e) {
+                document.getElementById('platformContent').innerHTML = `<p style="font-size:28px;font-weight:700;color:#333;margin-bottom:12px;">客服微信：</p><p style="font-size:32px;font-weight:700;color:#667eea;margin-bottom:20px;">17533304569</p>`;
+            }
         }
         function showToast(msg) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
         updateUserArea(); loadProducts(false); loadAds(false);

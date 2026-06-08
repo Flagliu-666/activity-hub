@@ -95,6 +95,19 @@ async function initDB() {
   db.run('CREATE INDEX IF NOT EXISTS idx_ads_status ON ads(status)');
   db.run('CREATE INDEX IF NOT EXISTS idx_ads_sort ON ads(sort_order DESC)');
 
+  // 设置表（存储平台配置）
+  db.run(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL DEFAULT ''
+    )
+  `);
+
+  // 创建默认设置
+  try {
+    db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('platform_contact', '17533304569')");
+  } catch(e) {}
+
   // 创建默认主管理员
   try {
     const defaultPassword = crypto.createHash('md5').update('admin123').digest('hex');
@@ -606,6 +619,36 @@ app.post('/api/admin/change-password', verifyAdmin, (req, res) => {
 
 app.post('/api/admin/logout', verifyAdmin, (req, res) => {
   res.json({ success: true });
+});
+
+// ===== 设置接口 =====
+// 获取设置（公开）
+app.get('/api/settings', (req, res) => {
+  const results = {};
+  try {
+    const stmt = db.prepare('SELECT key, value FROM settings');
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      results[row.key] = row.value;
+    }
+    stmt.free();
+  } catch(e) { console.error('查询设置失败:', e.message); }
+  res.json(results);
+});
+
+// 修改设置（仅管理员）
+app.put('/api/admin/settings', verifyAdmin, (req, res) => {
+  const { platform_contact } = req.body;
+  try {
+    if (platform_contact !== undefined) {
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('platform_contact', ?)", [platform_contact]);
+    }
+    saveDB();
+    res.json({ success: true });
+  } catch(e) {
+    console.error('修改设置失败:', e.message);
+    res.status(500).json({ error: '修改失败' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

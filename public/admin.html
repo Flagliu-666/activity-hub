@@ -59,6 +59,7 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('products')">📦 商品管理</button>
         <button class="tab-btn" onclick="switchTab('ads')">📢 广告管理</button>
+        <button class="tab-btn" onclick="switchTab('settings')">⚙️ 平台设置</button>
         <button class="tab-btn" onclick="switchTab('admins')">👥 管理员</button>
     </div>
     <div class="content">
@@ -79,6 +80,14 @@
                 <button class="btn btn-primary" onclick="addAd()" style="width:100%;">添加广告</button>
             </div>
             <div class="item-list" id="adList"></div>
+        </div>
+        <div id="tab-settings" class="section">
+            <div class="card">
+                <div class="card-title">📞 客服联系方式</div>
+                <p style="color:#999;font-size:13px;margin-bottom:12px;">用户点击底部"客服"按钮时将显示此联系方式</p>
+                <div class="form-group"><label class="form-label">客服微信/手机号</label><input type="text" class="form-input" id="platformContact" placeholder="例如：17533304569"></div>
+                <button class="btn btn-primary" onclick="saveSettings()" style="width:100%;">保存设置</button>
+            </div>
         </div>
         <div id="tab-admins" class="section">
             <div class="card">
@@ -121,6 +130,7 @@
             document.getElementById('tab-' + tabName).classList.add('active');
             if (tabName === 'products') loadProducts();
             if (tabName === 'ads') loadAds();
+            if (tabName === 'settings') loadSettings();
             if (tabName === 'admins') { if (adminRole === 'master') loadAdmins(); }
         }
         function showToast(msg) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
@@ -229,6 +239,23 @@
                 const data = await res.json();
                 if (data.success) { showToast('✅ 密码修改成功'); document.getElementById('currentPassword').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('confirmPassword').value = ''; }
                 else showToast('⚠️ ' + (data.error || '修改失败'));
+            } catch(e) { showToast('⚠️ 网络错误'); }
+        }
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const settings = await res.json();
+                document.getElementById('platformContact').value = settings.platform_contact || '17533304569';
+            } catch(e) { showToast('加载设置失败'); }
+        }
+        async function saveSettings() {
+            const platformContact = document.getElementById('platformContact').value.trim();
+            if (!platformContact) { showToast('⚠️ 请输入客服联系方式'); return; }
+            try {
+                const res = await fetch('/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Admin-Session': adminSession }, body: JSON.stringify({ platform_contact: platformContact }) });
+                const data = await res.json();
+                if (data.success) showToast('✅ 设置已保存');
+                else showToast('⚠️ ' + (data.error || '保存失败'));
             } catch(e) { showToast('⚠️ 网络错误'); }
         }
         let isAuthChecked = false;
